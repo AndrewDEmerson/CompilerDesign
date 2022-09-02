@@ -1,0 +1,17 @@
+{
+    // Debuger Config for VSCODE
+    // The Extension Native Debug https://open-vsx.org/vscode/item?itemName=webfreak.debug must be installed.
+    // GDB, G++, and Make should also be installed.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug",
+            "type": "gdb",
+            "request": "launch",
+            "target": "${fileDirname}/${fileBasenameNoExtension}",
+            "cwd": "${fileDirname}",
+            "valuesFormatting": "parseText",
+            "preLaunchTask": "Make Program",
+        }
+    ]
+}
