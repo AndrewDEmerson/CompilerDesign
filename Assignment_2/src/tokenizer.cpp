@@ -23,6 +23,27 @@ lex::token lex::tokenizer::nextToken() {
         state = 5;
       else if (c == '>')
         state = 6;
+
+
+      else if (c == ';')
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+      else if (c == '{')
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+      else if (c == '}')
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+      else if (c == '[')
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+      else if (c == ']')
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+      else if (c == '(')
+        state = 12;
+      else if (c == ')')
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+      else if (c == '^')
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+      else if (c == ',')
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+
       else {
         panic("Could not reach valid state");
       }
@@ -37,6 +58,14 @@ lex::token lex::tokenizer::nextToken() {
         lb.retract();
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
       }
+      break;
+    case 12: 
+      c = lb.nextChar();
+      if (c == '*') 
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+      else 
+        lb.retract();
+        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
       break;
     }
   }
