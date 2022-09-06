@@ -18,18 +18,16 @@ LINKFLAGS = -ggdb -c
 
 OBJECT_FILES=$(addprefix $(OBJ)/, $(OBJECTS))
 
-.PHONY: build clean dirs
+.PHONY: build clean
 
 build: $(BIN)/$(EXECUTABLE_NAME)
 
 $(BIN)/$(EXECUTABLE_NAME): $(OBJECT_FILES)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-$(OBJ)/%.o: $(SRC)/%.cpp dirs
+$(OBJ)/%.o: $(SRC)/%.cpp
+	@mkdir -p ./bin/obj
 	$(LINK) $(LINKFLAGS) $< -o $@
-
-dirs:
-	mkdir -p ./bin/obj
 
 clean:
 	rm -rf ./bin

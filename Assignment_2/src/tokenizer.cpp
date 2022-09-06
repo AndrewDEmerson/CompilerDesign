@@ -11,10 +11,15 @@ lex::token lex::tokenizer::nextToken() {
   char c;
   state = 0;
   start = 0;
+  if (endOfStream) {
+    throw -1;
+  }
   while (true) {
     c = lb.nextChar();
-    if (c == -1)
-      throw -1;
+    if (c == -1) {
+      endOfStream = true;
+      c = ' ';
+    }
     switch (state) {
       // Begin of State machine for Symbol Pattern Matching
     case 0:
@@ -86,7 +91,8 @@ lex::token lex::tokenizer::nextToken() {
       } else if (c == '.') { // you hit a decimal
         state = 14; // then move on to decimal digit loop of a Real Number (14)
       } else {      // otherwise, if you never hit a decimal
-        state = 17; // state 17 will return an integer
+        lb.retract();
+        return lex::token{tokentype[tokentypes::INTEGER], lb.getlexeme()};
       }
       break;
     case 14:
@@ -100,16 +106,11 @@ lex::token lex::tokenizer::nextToken() {
     case 15:
       if (std::isdigit(c)) { // keep reading digits until
         state = 15;
-      } else {      // you hit the end where
-        state = 16; // state 16 will return an real
+      } else { // you hit the end where
+        lb.retract();
+        return lex::token{tokentype[tokentypes::REAL], lb.getlexeme()};
       }
       break;
-    case 16: // will return an integer
-      lb.retract();
-      return lex::token{tokentype[tokentypes::REAL], lb.getlexeme()};
-    case 17: // will return a real number
-      lb.retract();
-      return lex::token{tokentype[tokentypes::INTEGER], lb.getlexeme()};
     default:
       panic("Invalid State Reached");
     }

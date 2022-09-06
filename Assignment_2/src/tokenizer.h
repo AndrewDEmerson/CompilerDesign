@@ -179,6 +179,7 @@ class tokenizer {
 private:
   std::istream &codestream;
   lexbuffer lb;
+  bool endOfStream = false;
   unsigned int state = 0;
   unsigned int start = 0;
   void fail();
