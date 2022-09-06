@@ -13,7 +13,8 @@ lex::token lex::tokenizer::nextToken() {
   start = 0;
   while (true) {
     c = lb.nextChar();
-    if (c == -1) throw -1;
+    if (c == -1)
+      throw -1;
     switch (state) {
       // Begin of State machine for Symbol Pattern Matching
     case 0:
@@ -69,6 +70,46 @@ lex::token lex::tokenizer::nextToken() {
         }
       }
       break;
+
+    // Vincent
+    case 12: // input that switches to case 12 that just
+      if (std::isdigit(c)) {
+        state = 13; // starts loop to read in expected digits (state 13)
+      } else {
+        fail(); // or should it just move onto the next state if I didn't find a
+                // digit
+      }
+      break;
+    case 13:
+      if (std::isdigit(c)) { // keep reading digits until
+        state = 13;
+      } else if (c == '.') { // you hit a decimal
+        state = 14; // then move on to decimal digit loop of a Real Number (14)
+      } else {      // otherwise, if you never hit a decimal
+        state = 17; // state 17 will return an integer
+      }
+      break;
+    case 14:
+      if (std::isdigit(c)) {
+        state = 15; // starts loop to read in expected digits (state 15)
+      } else {
+        fail(); // or should it just move onto the next state if I didn't find a
+                // digit
+      }
+      break;
+    case 15:
+      if (std::isdigit(c)) { // keep reading digits until
+        state = 15;
+      } else {      // you hit the end where
+        state = 16; // state 16 will return an real
+      }
+      break;
+    case 16: // will return an integer
+      lb.retract();
+      return lex::token{tokentype[tokentypes::REAL], lb.getlexeme()};
+    case 17: // will return a real number
+      lb.retract();
+      return lex::token{tokentype[tokentypes::INTEGER], lb.getlexeme()};
     default:
       panic("Invalid State Reached");
     }
@@ -80,6 +121,9 @@ void lex::tokenizer::fail() {
   switch (start) {
   case 0:
     start = state = 3;
+    break;
+  case 3:
+    start = state = 12;
     break;
   default:
     panic("Fail Switch has reached the end of possible cases");
