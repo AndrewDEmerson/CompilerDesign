@@ -26,23 +26,23 @@ lex::token lex::tokenizer::nextToken() {
 
 
       else if (c == ';')
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::SEMICOLON], lb.getlexeme()};
       else if (c == '{')
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::LBRACE], lb.getlexeme()};
       else if (c == '}')
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::RBRACE], lb.getlexeme()};
       else if (c == '[')
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::LBRACKET], lb.getlexeme()};
       else if (c == ']')
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::RBRACKET], lb.getlexeme()};
       else if (c == '(')
-        state = 12;
+        state = 5;
       else if (c == ')')
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::RPAREN], lb.getlexeme()};
       else if (c == '^')
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::CARAT], lb.getlexeme()};
       else if (c == ',')
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::COMMA], lb.getlexeme()};
 
       else {
         panic("Could not reach valid state");
@@ -56,16 +56,16 @@ lex::token lex::tokenizer::nextToken() {
         state = 3;
       else {
         lb.retract();
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::LTEQ], lb.getlexeme()};
       }
       break;
-    case 12: 
+    case 5: 
       c = lb.nextChar();
       if (c == '*') 
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::LCOMMENT], lb.getlexeme()};
       else 
         lb.retract();
-        return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
+        return lex::token{tokentype[tokentypes::LPAREN], lb.getlexeme()};
       break;
     }
   }
