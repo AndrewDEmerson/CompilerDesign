@@ -56,7 +56,7 @@ lex::token lex::tokenizer::nextToken() {
       else if (c == '.'){         //you hit a decimal
         state = 14;               //then move on to decimal digit loop of a Real Number (14)
       }
-      else if (c == 'other') {    //otherwise, if you never hit a decimal
+      else {    //otherwise, if you never hit a decimal
         state = 17;               //state 17 will return an integer
       }
     case 14:
@@ -72,7 +72,7 @@ lex::token lex::tokenizer::nextToken() {
       if (std::isdigit(c)) {      //keep reading digits until
         state = 15;               
       }
-      else if (c == 'other') {    //you hit the end where
+      else {    //you hit the end where
         state = 16;               //state 16 will return an integer
       }
     //case 16: will return an integer
@@ -84,7 +84,7 @@ lex::token lex::tokenizer::nextToken() {
     //  lb.retract();
     //  return lex::token{tokentype[tokentypes::REAL], lb.getlexeme()};
 
-
+    }
   }
 }
 
