@@ -1,7 +1,4 @@
 #include "lexbuffer.h"
-#include <fstream>
-#include <istream>
-#include <string>
 
 lexbuffer::lexbuffer(std::istream &stream):codestream(stream) {
   
@@ -23,7 +20,7 @@ void lexbuffer::fail(){
 }
 
 void lexbuffer::retract(unsigned int retractAmount){
-  readFromBuffer = buffer.size() - retractAmount;
+  readFromBuffer = retractAmount;
 }
 
 
@@ -34,7 +31,7 @@ void lexbuffer::clearcache(){
 std::string lexbuffer::getlexeme(){
   std::string s;
   for (int i = 0; i < buffer.size()-readFromBuffer;i++){
-    s.push_back(buffer[i]);
+    s.push_back(toupper(buffer[i]));
   }
   buffer.erase(buffer.begin(),buffer.end()-readFromBuffer);
   return s;

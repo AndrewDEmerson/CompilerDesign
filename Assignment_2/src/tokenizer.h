@@ -70,7 +70,7 @@ enum tokentypes {
   LTEQ,
   GTEQ,
   LT,
-  QT,
+  GT,
   PLUSEQUAL,
   MINUSEQUAL,
   DIVEQUAL,
@@ -87,6 +87,7 @@ enum tokentypes {
   RCOMMENT
 };
 
+//Note: first 51 words are Reserve Words
 static std::string tokentype[] =  {
   "AND",
   "ARRAY",
@@ -152,7 +153,7 @@ static std::string tokentype[] =  {
   "LTEQ",
   "GTEQ",
   "LT",
-  "QT",
+  "GT",
   "PLUSEQUAL",
   "MINUSEQUAL",
   "DIVEQUAL",
@@ -180,6 +181,8 @@ private:
   lexbuffer lb;
   unsigned int state = 0;
   unsigned int start = 0;
+  void fail();
+  int isKeyword(std::string *word);
 public:
   token nextToken();
   tokenizer(std::istream &stream);
