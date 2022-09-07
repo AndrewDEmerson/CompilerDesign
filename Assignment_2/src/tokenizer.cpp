@@ -33,6 +33,16 @@ lex::token lex::tokenizer::nextToken() {
         return lex::token{tokentype[tokentypes::EQUAL], lb.getlexeme()};
       else if (c == '>')
         state = 2;
+      else if (c == '+')
+        state = 9;
+      else if (c == '-')
+        state = 10;
+      else if (c == '*')
+        state = 11;
+      else if (c == '/')
+        state = 16;
+      else if (c == ':')
+        state = 17;   
       else if (c == ';')
         return lex::token{tokentype[tokentypes::SEMICOLON], lb.getlexeme()};
       else if (c == '{')
@@ -141,6 +151,43 @@ lex::token lex::tokenizer::nextToken() {
         return lex::token{tokentype[tokentypes::REAL], lb.getlexeme()};
       }
       break;
+
+    case 9:
+      if (c == '=')
+        return lex::token{tokentype[tokentypes::PLUSEQUAL], lb.getlexeme()};
+      else{
+        lb.retract();
+        return lex::token{tokentype[tokentypes::PLUSOP], lb.getlexeme()};
+      }
+    case 10:
+      if (c == '=')
+        return lex::token{tokentype[tokentypes::MINUSEQUAL], lb.getlexeme()};
+      else{
+        lb.retract();
+        return lex::token{tokentype[tokentypes::MINUSOP], lb.getlexeme()};
+      }
+    case 11:
+      if (c == '=')
+        return lex::token{tokentype[tokentypes::MULTEQUAL], lb.getlexeme()};
+      else if (c == ')')
+        return lex::token{tokentype[tokentypes::RCOMMENT], lb.getlexeme()};
+      else{
+        lb.retract();
+        return lex::token{tokentype[tokentypes::MULTOP], lb.getlexeme()};
+      }
+    case 16:
+      if (c == '=')
+        return lex::token{tokentype[tokentypes::DIVEQUAL], lb.getlexeme()};
+      else{
+        lb.retract();
+        return lex::token{tokentype[tokentypes::DIVEQUAL], lb.getlexeme()};
+      }
+    case 17:
+      if(c == '=')
+        return lex::token{tokentype[tokentypes::ASSIGN], lb.getlexeme()};
+      else {
+        panic("Expecting =");
+      }
     default:
       panic("Invalid State Reached");
     }
