@@ -2,17 +2,26 @@
 #include <iostream>
 #include <ostream>
 
-int main() {
-  std::fstream codefile("testing.txt");
+int main(int argc, char *argv[]) {
+  if (argc != 2){
+    std::cout << "Please Specify the path to the source file as an argument, EXITING" << std::endl;
+    return 0;
+  }
+  std::fstream codefile(argv[1]);
   if (!codefile.is_open()) {
-    throw "Could not open file";
+    std::cerr << "Could not open file" << std::endl;
+    return -1;
   }
   lex::tokenizer tokenmaker(codefile);
 
   while (true) {
     try {
       lex::token a = tokenmaker.nextToken();
-      std::cout << a.type << '\t' << a.lexeme << std::endl;
+      if (a.type == "TOKEN_ERROR"){
+        std::cout << "TOKEN ERROR at line " << a.ln << ": Invalid token at '" << a.lexeme << "'" << std::endl;
+      }else{
+        std::cout << a.type << '\t' << a.lexeme << '\t' << std::endl;
+      }
     } catch (int) {
       std::cout << "end of file" << std::endl;
       return 0;

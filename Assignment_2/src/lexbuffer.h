@@ -6,8 +6,9 @@ class lexbuffer {
 private:
   std::vector<char> buffer;
   std::istream &codestream;
-  //std::ifstream codefile;
+  // std::ifstream codefile;
   int readFromBuffer = 0;
+
 public:
   lexbuffer(std::istream &stream);
   char nextChar();
@@ -15,4 +16,5 @@ public:
   void fail();
   void clearcache();
   std::string getlexeme();
+  int lineNumber = 1;
 };

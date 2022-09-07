@@ -85,7 +85,12 @@ enum tokentypes {
   LBRACE,
   RBRACE,
   LCOMMENT,
-  RCOMMENT
+  RCOMMENT,
+  COMMENT,
+  PERIOD,
+  DOTDOT,
+  COLON,
+  TOKEN_ERROR,
 };
 
 //Note: first 51 words are Reserve Words
@@ -169,12 +174,18 @@ static std::string tokentype[] =  {
   "LBRACE",
   "RBRACE",
   "LCOMMENT",
-  "RCOMMENT"
+  "RCOMMENT",
+  "COMMENT",
+  "PERIOD",
+  "DOTDOT",
+  "COLON",
+  "TOKEN_ERROR"
 };
 
 struct token {
   std::string &type;
   std::string lexeme;
+  int ln = 0;
 };
 
 class tokenizer {
@@ -186,6 +197,9 @@ private:
   unsigned int start = 0;
   void fail();
   int isKeyword(std::string *word);
+  int braceCount = 0;
+  int bracketCount = 0;
+  int parenCount = 0;
 public:
   token nextToken();
   tokenizer(std::istream &stream);
