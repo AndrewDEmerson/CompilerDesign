@@ -24,15 +24,15 @@ lex::token lex::tokenizer::nextToken() {
       else if (c == '>')
         state = 6;
       else if (c == '+')
-        state = 9;
+        state = 18;
       else if (c == '-')
-        state = 10;
+        state = 19;
       else if (c == '*')
-        state = 11;
+        state = 20;
       else if (c == '/')
-        state = 13;
+        state = 21;
       else if (c == ':')
-        state = 14;
+        state = 22;
 
 
       else if (c == ';')
@@ -77,7 +77,7 @@ lex::token lex::tokenizer::nextToken() {
         lb.retract();
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
       break;
-    case 9:
+    case 18:
       c= lb.nextChar();
       if (c == '=')
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
@@ -85,7 +85,7 @@ lex::token lex::tokenizer::nextToken() {
         lb.retract();
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
       }
-    case 10:
+    case 19:
       c= lb.nextChar();
       if (c == '=')
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
@@ -93,7 +93,7 @@ lex::token lex::tokenizer::nextToken() {
         lb.retract();
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
       }
-    case 11:
+    case 20:
       c= lb.nextChar();
       if (c == '=')
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
@@ -103,7 +103,7 @@ lex::token lex::tokenizer::nextToken() {
         lb.retract();
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
       }
-    case 13:
+    case 21:
       c= lb.nextChar();
       if (c == '=')
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
@@ -111,7 +111,7 @@ lex::token lex::tokenizer::nextToken() {
         lb.retract();
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
       }
-    case 14:
+    case 22:
       c= lb.nextChar();
       if(c == '=')
         return lex::token{tokentype[tokentypes::LT], lb.getlexeme()};
