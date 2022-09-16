@@ -1,4 +1,4 @@
-EXECUTABLE_NAME = scanner
+EXECUTABLE_NAME = parser
 
 # Files
 OBJECTS += parser.o

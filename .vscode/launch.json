@@ -8,8 +8,8 @@
             "name": "Debug",
             "type": "gdb",
             "request": "launch",
-            "target": "${fileBasenameNoExtension}",
-            "cwd": "${fileDirname}/../bin",
+            "target": "bin/parser",
+            "cwd": "${fileDirname}/..",
             "valuesFormatting": "parseText",
             "preLaunchTask": "Make Program",
         }
