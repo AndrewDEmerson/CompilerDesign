@@ -1,5 +1,6 @@
 #include "tokenstream.h"
 #include "tokenizer.h"
+#include <iostream>
 #include <istream>
 
 lex::tokenStream::tokenStream(std::istream &stream) : tokenMaker(stream) {}
@@ -7,7 +8,9 @@ lex::tokenStream::tokenStream(std::istream &stream) : tokenMaker(stream) {}
 lex::token lex::tokenStream::nextToken() {
   if (rewindAmount == 0) {
     try {
-      buffer[writePos] = tokenMaker.nextToken();
+      do {
+        buffer[writePos] = tokenMaker.nextToken();
+      }while (buffer[writePos].type == lex::tokentypes::COMMENT);
     } catch (int) {
       // Reached EOF
       buffer[writePos] =

@@ -18,13 +18,15 @@ void parser::node::printTree(int level) {
   }
   std::cout << parser::nodeNames[mytype];
   if (mytype == nodeTypes::unsignedInteger || mytype == nodeTypes::label) {
-    std::cout << ": " << *(int *)value;
+    std::cout << ": " << *static_cast<int*>(value);
   } else if (mytype == nodeTypes::variable ||
              mytype == nodeTypes::multiplyingOperator ||
              mytype == nodeTypes::addingOperator ||
              mytype == nodeTypes::relationalOperator ||
              mytype == nodeTypes::sign) {
     std::cout << ": " << id;
+  } else if (mytype == nodeTypes::unsignedReal) {
+    std::cout << ": " << *static_cast<float*>(value);
   }
   std::cout << std::endl;
   for (int i = 0; i < children.size(); i++) {

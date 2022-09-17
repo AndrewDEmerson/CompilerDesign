@@ -8,7 +8,7 @@
 #include <ostream>
 
 int main() {
-  std::fstream codefile("test.txt");
+  std::fstream codefile("test.pas");
   lex::tokenStream tokenstream(codefile);
   parser::node *head;
   head = parseStatement(tokenstream);
@@ -470,9 +470,9 @@ parser::node *parseCompoundStatement(lex::tokenStream &tokenstream) {
 parser::node *parseTemplate(lex::tokenStream &tokenstream) {
   parser::node *child;
   parser::node *currentNode;
-  child = parseVariable(tokenstream);
+  child = parseChildNodeType(tokenstream);
   if (child != nullptr) {
-    currentNode = new parser::node(parser::nodeTypes::assignmentStatement);
+    currentNode = new parser::node(parser::nodeTypes::template);
     currentNode->attachChild(child);
     return currentNode;
   }
