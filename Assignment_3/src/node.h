@@ -20,7 +20,16 @@ enum nodeTypes{
   string,
   multiplyingOperator,
   addingOperator,
+  relationalOperator,
   sign,
+  unlabelledStatement,
+  assignmentStatement,
+  simpleStatement,
+  gotoStatement,
+  label,
+  compoundStatement,
+  structuredStatement,
+  conditionalStatement,
 };
 
 static std::string nodeNames[] = {
@@ -39,7 +48,16 @@ static std::string nodeNames[] = {
   "string",
   "multiplyingOperator",
   "addingOperator",
+  "relationalOperator",
   "sign",
+  "unlabelledStatement",
+  "assignmentStatement",
+  "simpleStatement",
+  "gotoStatement",
+  "label",
+  "compoundStatement",
+  "structuredStatement",
+  "conditionalStatement"
 };
 
 class node{
