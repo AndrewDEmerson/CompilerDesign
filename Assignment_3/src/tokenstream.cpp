@@ -10,7 +10,8 @@ lex::token lex::tokenStream::nextToken() {
     try {
       do {
         buffer[writePos] = tokenMaker.nextToken();
-      }while (buffer[writePos].type == lex::tokentypes::COMMENT);
+      } while (buffer[writePos].type == lex::tokentypes::COMMENT ||
+               buffer[writePos].type == lex::tokentypes::TOKEN_ERROR);
     } catch (int) {
       // Reached EOF
       buffer[writePos] =
@@ -29,4 +30,15 @@ bool lex::tokenStream::rewind(int amount) {
     return false;
   }
   return true;
+}
+
+lex::token lex::tokenStream::fastForward(lex::tokentypes type) {
+  lex::token readIN;
+  do {
+    readIN = nextToken();
+    if (readIN.type == lex::tokentypes::TOKEN_ERROR) {
+      throw "Reached EOF before expected";
+    }
+  } while (readIN.type != type);
+  return readIN;
 }

@@ -7,6 +7,7 @@ public:
   tokenStream(std::istream &stream);
   lex::token nextToken();
   bool rewind(int amount = 1);
+  lex::token fastForward(lex::tokentypes type);
 
 private:
   int writePos = 0;

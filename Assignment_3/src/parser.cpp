@@ -6,12 +6,23 @@
 #include <fstream>
 #include <iostream>
 #include <ostream>
+#include <string>
+
+unsigned int numErrors;
+
+void logError(const char* err){
+  std::cerr << err << std::endl;
+}
 
 int main() {
   std::fstream codefile("test.pas");
   lex::tokenStream tokenstream(codefile);
   parser::node *head;
-  head = parseStatement(tokenstream);
+  try {
+    head = parseStatement(tokenstream);
+  } catch (const char* error) {
+    std::cout << error << std::endl;
+  }
   head->printTree();
 }
 
@@ -22,17 +33,16 @@ parser::node *parseIfStatement(lex::tokenStream &tokenstream) {
   }
   parser::node *child = parseExpression(tokenstream);
   if (child == nullptr) {
-    std::cerr << "parsing IF: no expression after IF" << std::endl;
-    throw -1;
+    throw "parseIfStatement: expected expression after IF";
   }
   if (tokenstream.nextToken().type != lex::tokentypes::THEN) {
-    std::cerr << "parsing IF: has no keyword THEN" << std::endl;
-    throw -1;
+    //std::cerr << "parsing IF: has no keyword THEN" << std::endl;
+    logError("parseIfStatement: expected THEN");
+    tokenstream.fastForward(lex::tokentypes::THEN);
   }
   parser::node *child2 = parseStatement(tokenstream);
   if (child2 == nullptr) {
-    std::cerr << "parsing IF: no statement after THEN" << std::endl;
-    throw -1;
+    throw "parseIfStatement: expected statement after THEN";
   }
   parser::node *currentNode = new parser::node(parser::nodeTypes::if_statement);
   currentNode->attachChild(child);
@@ -43,8 +53,7 @@ parser::node *parseIfStatement(lex::tokenStream &tokenstream) {
   }
   parser::node *child3 = parseStatement(tokenstream);
   if (child2 == nullptr) {
-    std::cerr << "parsing IF: no statement after ELSE" << std::endl;
-    throw -1;
+    throw "parseIfStatement: expected statement after ELSE";
   }
   currentNode->attachChild(child3);
   return currentNode;
@@ -64,10 +73,7 @@ parser::node *parseExpression(lex::tokenStream &tokenstream) {
         currentNode->attachChild(child3);
         return currentNode;
       }
-      std::cerr
-          << "parsing expression: no simple expression after relation operator"
-          << std::endl;
-      throw -1;
+      throw "parseExpression: expected simple expression after relation operator";
     }
     parser::node *currentNode = new parser::node(parser::nodeTypes::expression);
     currentNode->attachChild(child);
@@ -91,10 +97,7 @@ parser::node *parseSimpleExpression(lex::tokenStream &tokenstream) {
         currentNode->attachChild(child3);
         return currentNode;
       }
-      std::cerr << "Parse simple expression expected simple expression after "
-                   "adding operator"
-                << std::endl;
-      throw -1;
+      throw "parseSimpleExpression: expected simple expresssion after TERM ADDINGOPERATOR";
     }
     currentNode = new parser::node(parser::nodeTypes::simpleExpression);
     currentNode->attachChild(child);
@@ -109,9 +112,7 @@ parser::node *parseSimpleExpression(lex::tokenStream &tokenstream) {
       currentNode->attachChild(child2);
       return currentNode;
     }
-    std::cerr << "In parse simple expression, expected term after sign"
-              << std::endl;
-    throw -1;
+    throw "parseSimpleExpression: expected TERM after SIGN";
   }
   return nullptr;
 }
@@ -132,8 +133,7 @@ parser::node *parseTerm(lex::tokenStream &tokenstream) {
         currentNode->attachChild(child3);
         return currentNode;
       }
-      std::cerr << "Throw at parse term" << std::endl;
-      throw -1;
+      throw "parseTerm: expected TERM after MULTIPLYING OPERATOR";
     }
     currentNode = new parser::node(parser::nodeTypes::term);
     currentNode->attachChild(child);
@@ -169,8 +169,7 @@ parser::node *parseFactor(lex::tokenStream &tokenstream) {
         return currentNode;
       }
     }
-    std::cerr << "Parsing Factor missing expression after ()" << std::endl;
-    throw -1;
+    throw "parseFactor: expected expression after (";
   }
   tokenstream.rewind();
   return nullptr;
@@ -442,19 +441,17 @@ parser::node *parseCompoundStatement(lex::tokenStream &tokenstream) {
     while (true) {
       child = parseStatement(tokenstream);
       if (child == nullptr) {
-        std::cerr << "Parse Compound Statement: No statement" << std::endl;
-        throw -1;
+        throw "parseCompoundStatement: expected statement";
       }
       if (tokenstream.nextToken().type != lex::tokentypes::SEMICOLON) {
-        std::cerr << "Parse Compound Statement: missing semicolon" << std::endl;
-        throw -1;
+        logError("parseCompoundStatement: expected semicolon");
+        tokenstream.fastForward(lex::tokentypes::SEMICOLON);
       }
       currentNode->attachChild(child);
       if (tokenstream.nextToken().type == lex::tokentypes::END) {
         if (tokenstream.nextToken().type != lex::tokentypes::SEMICOLON) {
-          std::cerr << "Parse Compound Statement: missing semicolon at END"
-                    << std::endl;
-          throw -1;
+          logError("parseCompoundStatement: expected semicolon");
+          tokenstream.fastForward(lex::tokentypes::SEMICOLON);
         }
         return currentNode;
       } else {
