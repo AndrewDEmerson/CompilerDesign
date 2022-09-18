@@ -2,27 +2,34 @@
 #include "tokenizer.h"
 #include "tokenstream.h"
 
-parser::node *parseIfStatement(lex::tokenStream &);
-parser::node *parseSimpleExpression(lex::tokenStream &);
-parser::node *parseExpression(lex::tokenStream &);
-parser::node *parseTerm(lex::tokenStream &);
-parser::node *parseFactor(lex::tokenStream &);
-parser::node *parseVariable(lex::tokenStream &);
-parser::node *parseUnsignedConstant(lex::tokenStream &);
-parser::node *parseUnsignedInteger(lex::tokenStream &);
-parser::node *parseUnsignedNumber(lex::tokenStream &);
-parser::node *parseUnsignedReal(lex::tokenStream &);
-parser::node *parseString(lex::tokenStream &);
-parser::node *parseMultiplyingOperator(lex::tokenStream &);
-parser::node *parseAddingOperator(lex::tokenStream &);
-parser::node *parseRelationalOperator(lex::tokenStream &);
-parser::node *parseSign(lex::tokenStream &);
-parser::node *parseStatement(lex::tokenStream &);
-parser::node *parseUnlabelledStatement(lex::tokenStream &);
-parser::node *parseAssignmentStatement(lex::tokenStream &);
-parser::node *parseSimpleStatement(lex::tokenStream &);
-parser::node *parseGoToStatement(lex::tokenStream &);
-parser::node *parseLabel(lex::tokenStream &);
-parser::node *parseCompoundStatement(lex::tokenStream &);
-parser::node *parseStructuredStatement(lex::tokenStream &);
-parser::node *parseConditionalStatement(lex::tokenStream &);
+class parser {
+public:
+  node *parseIfStatement(lex::tokenStream &);
+  node *parseSimpleExpression(lex::tokenStream &);
+  node *parseExpression(lex::tokenStream &);
+  node *parseTerm(lex::tokenStream &);
+  node *parseFactor(lex::tokenStream &);
+  node *parseVariable(lex::tokenStream &);
+  node *parseUnsignedConstant(lex::tokenStream &);
+  node *parseUnsignedInteger(lex::tokenStream &);
+  node *parseUnsignedNumber(lex::tokenStream &);
+  node *parseUnsignedReal(lex::tokenStream &);
+  node *parseString(lex::tokenStream &);
+  node *parseMultiplyingOperator(lex::tokenStream &);
+  node *parseAddingOperator(lex::tokenStream &);
+  node *parseRelationalOperator(lex::tokenStream &);
+  node *parseSign(lex::tokenStream &);
+  node *parseStatement(lex::tokenStream &);
+  node *parseUnlabelledStatement(lex::tokenStream &);
+  node *parseAssignmentStatement(lex::tokenStream &);
+  node *parseSimpleStatement(lex::tokenStream &);
+  node *parseGoToStatement(lex::tokenStream &);
+  node *parseLabel(lex::tokenStream &);
+  node *parseCompoundStatement(lex::tokenStream &);
+  node *parseStructuredStatement(lex::tokenStream &);
+  node *parseConditionalStatement(lex::tokenStream &);
+  void logError(const char *err);
+
+private:
+  int numErrors = 0;
+};

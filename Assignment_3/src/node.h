@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-namespace parser {
 
 enum nodeTypes{
   if_statement,
@@ -74,5 +73,3 @@ class node{
     nodeTypes mytype;
     std::vector<node*> children;
 };
-
-}

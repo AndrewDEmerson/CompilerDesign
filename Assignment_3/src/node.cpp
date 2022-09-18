@@ -2,21 +2,21 @@
 #include <iostream>
 #include <string>
 
-parser::node::node(parser::nodeTypes nt) : mytype(nt) {}
+node::node(nodeTypes nt) : mytype(nt) {}
 
-parser::node::node(parser::nodeTypes nt, std::string name)
+node::node(nodeTypes nt, std::string name)
     : mytype(nt), id(name) {}
-parser::node::node(parser::nodeTypes nt, void *val) : mytype(nt), value(val) {}
+node::node(nodeTypes nt, void *val) : mytype(nt), value(val) {}
 
-parser::nodeTypes parser::node::type() { return mytype; }
+nodeTypes node::type() { return mytype; }
 
-void parser::node::attachChild(node *subtree) { children.push_back(subtree); }
+void node::attachChild(node *subtree) { children.push_back(subtree); }
 
-void parser::node::printTree(int level) {
+void node::printTree(int level) {
   for (int i = 0; i < level; i++) {
     std::cout << "|  ";
   }
-  std::cout << parser::nodeNames[mytype];
+  std::cout << nodeNames[mytype];
   if (mytype == nodeTypes::unsignedInteger || mytype == nodeTypes::label) {
     std::cout << ": " << *static_cast<int*>(value);
   } else if (mytype == nodeTypes::variable ||
