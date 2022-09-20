@@ -556,7 +556,7 @@ node* parser::parseForStatement(lex::tokenStream& tokenstream) {
     node* child3;
     if (tokenstream.nextToken().type == lex::tokentypes::FOR) {
         currentNode = new node(nodeTypes::forStatement);
-        child1 = parsecontrolVariable(tokenstream);
+        child1 = parseControlVariable(tokenstream);
         if (child1 == nullptr) {
             throw "parseForStatement: expected control variable";
         }
@@ -592,7 +592,7 @@ node* parser::parseForList(lex::tokenStream& tokenstream) {
         currentNode = new node(nodeTypes::forList);
         if (tokenstream.nextToken().type != lex::tokentypes::TO) {
             tokenstream.rewind();
-            if (tokenstream.nextToken() != lex::tokentypes::DOWNTO) {
+            if (tokenstream.nextToken().type != lex::tokentypes::DOWNTO) {
                 throw "parseForList: expected TO or DOWNTO";
             }
         }
