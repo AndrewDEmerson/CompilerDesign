@@ -394,6 +394,12 @@ node *parser::parseStructuredStatement(lex::tokenStream &tokenstream) {
     currentNode->attachChild(child);
     return currentNode;
   }
+  child = parseRepetitiveStatement(tokenstream);
+  if (child != nullptr) {
+    currentNode = new node(nodeTypes::structuredStatement);
+    currentNode->attachChild(child);
+    return currentNode;
+  }
   return nullptr;
 }
 

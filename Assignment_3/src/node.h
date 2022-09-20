@@ -64,7 +64,15 @@ static std::string nodeNames[] = {
   "label",
   "compoundStatement",
   "structuredStatement",
-  "conditionalStatement"
+  "conditionalStatement",
+  "whileStatement",
+  "repetitiveStatement",
+  "repeatStatement",
+  "forStatement",
+  "forList",
+  "controlVariable",
+  "initialValue",
+  "finalValue",
 };
 
 class node{
