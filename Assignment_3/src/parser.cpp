@@ -464,6 +464,178 @@ node *parser::parseCompoundStatement(lex::tokenStream &tokenstream) {
   return nullptr;
 }
 
+node* parser::parseWhileStatement(lex::tokenStream& tokenstream) {
+    node *child;
+    node *child2;
+    node *currentNode;
+    if (tokenstream.nextToken().type == lex::tokentypes::WHILE) {
+        currentNode = new node(nodeTypes::whileStatement);
+        child = parseExpression(tokenstream);
+        if (child == nullptr) {
+            throw "parseWhileStatement: expected expression";
+        }
+        currentNode->attachChild(child);
+        if (tokenstream.nextToken().type != lex::tokentypes::DO) {
+            throw "parseWhileStatement: expected DO";
+        }
+        child2 = parseStatement(tokenstream);
+        if (child2 == nullptr) {
+            throw "parseWhileStatement: expected statement";
+        }
+        currentNode->attachChild(child2);
+        return currentNode;
+    }
+    tokenstream.rewind();
+    return nullptr;
+}
+
+node* parser::parseRepetitiveStatement(lex::tokenStream& tokenstream) {
+    node* currentNode;
+    node* childNode;
+    childNode = parseWhileStatement(tokenstream);
+    if (childNode != nullptr) {
+        currentNode = new node(nodeTypes::repetitiveStatement);
+        currentNode->attachChild(childNode);
+        return currentNode;
+    }
+    tokenstream.rewind();
+    childNode = parseRepeatStatement(tokenstream);
+    if (childNode != nullptr) {
+        currentNode = new node(nodeTypes::repetitiveStatement);
+        currentNode->attachChild(childNode);
+        return currentNode;
+    }
+    tokenstream.rewind();
+    childNode = parseForStatement(tokenstream);
+    if (childNode != nullptr) {
+        currentNode = new node(nodeTypes::repetitiveStatement);
+        currentNode->attachChild(childNode);
+        return currentNode;
+    }
+    return nullptr
+}
+
+node* parser::parseRepeatStatement(lex::tokenStream& tokenstream) {
+    node* currentNode;
+    node* child1;
+    node* child2;
+    node* loopChild;
+    if (tokenstream.nextToken().type == lex::tokentypes::REPEAT) {
+        currentNode = new node(nodeTypes::repeatStatement);
+        child1 = parseStatement(tokenstream);
+        if (child1 == nullptr) {
+            throw "parserRepeatStatement: expected statement";
+        }
+        currentNode->attachChild(child1);
+        while (tokenstream.nextToken().type == lex::tokentypes::SEMICOLON) {
+            loopChild = parseStatement();
+            if (loopChild == nullptr) {
+                throw "parserRepeatStatement: expected statement";
+            }
+            currentNode->attachChild(loopChild);
+        }
+        tokenstream.rewind();
+        if (tokenstream.nextToken().type != lex::tokentypes::UNTIL) {
+            throw "parserRepeatStatement: expected UNTIL";
+        }
+        child2 = parseExpression(tokenstream);
+        if (child2 == nullptr) {
+            throw "parserRepeatStatement: expected expression";
+        }
+        currentNode->attachChild(child2);
+        return currentNode;
+    }
+    tokenstream.rewind();
+    return nullptr;
+}
+
+node* parser::parseForStatement(lex::tokenStream& tokenstream) {
+    node* currentNode;
+    node* child1;
+    node* child2;
+    node* child3;
+    if (tokenstream.nextToken().type == lex::tokentypes::FOR) {
+        currentNode = new node(nodeTypes::forStatement);
+        child1 = controlVariable(tokenstream);
+        if (child1 == nullptr) {
+            throw "parseForStatement: expected control variable";
+        }
+        if (tokenstream.nextToken().type != lex::tokentypes::ASSIGN) {
+            throw "parseForStatement: expected assignment";
+        }
+        child2 = parseForList(tokenstream);
+        if (child2 == nullptr) {
+            throw "parseForStatement: expected for list";
+        }
+        if (tokenstream.nextToken().type != lex::tokentypes::DOWNTO) {
+            throw "parseForStatement: expected DOWNTO";
+        }
+        child3 = parseFinalValue(tokenstream);
+        if (child3 == nullptr) {
+            throw "parseForStatement: expected final value";
+        }
+        currentNode->attachChild(child1);
+        currentNode->attachChild(child2);
+        currentNode->attachChild(child3);
+        return currentNode;
+    }
+    tokenstream.rewind();
+    return nullptr;
+}
+
+node* parser::parseForList(lex::tokenStream& tokenstream) {
+    node* currentNode;
+    node* child1;
+    node* child2;
+    child1 = parseInitialValue(tokenstream);
+    if (child1 != nullptr) {
+        currentNode = new node(nodeTypes::forList);
+        if (tokenstream.nextToken() != lex::tokentypes::TO) {
+            tokenstream.rewind();
+            if (tokenstream.nextToken() != lex::tokentypes::DOWNTO) {
+                throw "parseForList: expected TO or DOWNTO";
+            }
+        }
+        child2 = parseFinalValue(tokenstream);
+        if (child2 == nullptr) {
+            throw "parseForList: expected final value";
+        }
+        currentNode->attachChild(child1);
+        currentNode->attachChild(child2);
+        return currentNode;
+    }
+    tokenstream.rewind();
+    return nullptr;
+}
+
+node* parser::parseInitialValue(lex::tokenStream& tokenstream) {
+    node* currentNode;
+    node* child;
+    child = parseExpression(tokenstream);
+    if (child != nullptr) {
+        currentNode = new node(nodeTypes::initialValue);
+        currentNode->attachChild(child);
+    }
+    tokenstream.rewind();
+    return nullptr;
+}
+
+node* parser::parseFinalValue(lex::tokenStream& tokenstream) {
+    node* currentNode;
+    node* child;
+    child = parseExpression(tokenstream);
+    if (child != nullptr) {
+        currentNode = new node(nodeTypes::finalValue);
+        currentNode->attachChild(child);
+    }
+    tokenstream.rewind();
+    return nullptr;
+}
+
+node* parser::parseControlVariable(lex::tokenStream& tokenstream) {
+
+}
+
 /*
 node *parseTemplate(lex::tokenStream &tokenstream) {
   node *child;

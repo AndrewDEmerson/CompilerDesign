@@ -29,6 +29,14 @@ enum nodeTypes{
   compoundStatement,
   structuredStatement,
   conditionalStatement,
+  whileStatement,
+  repetitiveStatement,
+  repeatStatement,
+  forStatement,
+  forList,
+  controlVariable,
+  initialValue,
+  finalValue,
 };
 
 static std::string nodeNames[] = {

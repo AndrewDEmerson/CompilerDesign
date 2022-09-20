@@ -28,6 +28,15 @@ public:
   node *parseCompoundStatement(lex::tokenStream &);
   node *parseStructuredStatement(lex::tokenStream &);
   node *parseConditionalStatement(lex::tokenStream &);
+  node *parseWhileStatement(lex::tokenStream&);
+  node *parseRepetitiveStatement(lex::tokenStream&);
+  node *parseRepeatStatement(lex::tokenStream&);
+  node* parseForStatement(lex::tokenStream&);
+  node* parseForList(lex::tokenStream&);
+  node* parseInitialValue(lex::tokenStream&);
+  node* parseFinalValue(lex::tokenStream&);
+  node* parseControlVariable(lex::tokenStream&);
+  
   void logError(const char *err);
 
 private:
