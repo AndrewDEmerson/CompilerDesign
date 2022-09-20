@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
 
 enum nodeTypes{
   if_statement,
@@ -13,6 +14,7 @@ enum nodeTypes{
   simpleExpression,
   unsignedConstant,
   unsignedInteger,
+  unsignedIntegerConstant,
   unsignedReal,
   unsignedNumber,
   nil,
@@ -51,6 +53,7 @@ static std::string nodeNames[] = {
   "simpleExpression",
   "unsignedConstant",
   "unsignedInteger",
+  "unsignedIntegerConstant",
   "unsignedReal",
   "unsignedNumber",
   "nil",
@@ -88,7 +91,11 @@ class node{
     std::string id;
     void* value;
     void printTree(int level = 0);
+    void printFile(int level = 0);
+    void setLnum(int);
+    int retLnum();
   private:
     nodeTypes mytype;
+    int lnum;
     std::vector<node*> children;
 };
