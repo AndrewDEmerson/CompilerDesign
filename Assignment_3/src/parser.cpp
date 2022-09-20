@@ -17,6 +17,7 @@ int main() {
   try {
     head = prse.parseStatement(tokenstream);
     head->printTree();
+    head->printFile();
   } catch (const char *error) {
     std::cerr << "Could not recover from error: " << error << "\nExiting" << std::endl;
   }
@@ -222,8 +223,7 @@ node *parser::parseUnsignedNumber(lex::tokenStream &tokenstream) {
   //<unsigned Integer>
   child = parseUnsignedInteger(tokenstream);
   if (child != nullptr) {
-    currentNode = new node(nodeTypes::unsignedNumber);
-    currentNode->attachChild(child);
+    currentNode = child;
     return currentNode;
   }
   //<unsigned Real>
@@ -240,8 +240,7 @@ node *parser::parseUnsignedNumber(lex::tokenStream &tokenstream) {
 node *parser::parseUnsignedInteger(lex::tokenStream &tokenstream) {
   lex::token currentToken = tokenstream.nextToken();
   if (currentToken.type == lex::tokentypes::INTEGER) {
-    return new node(nodeTypes::unsignedInteger,
-                    new int(stoi(currentToken.lexeme)));
+    return new node(nodeTypes::unsignedInteger, new int(stoi(currentToken.lexeme)));
   }
   tokenstream.rewind();
   return nullptr;
@@ -273,7 +272,7 @@ node *parser::parseMultiplyingOperator(lex::tokenStream &tokenstream) {
       currentToken.type == lex::tokentypes::DIV ||
       currentToken.type == lex::tokentypes::MOD ||
       currentToken.type == lex::tokentypes::AND) {
-    return new node(nodeTypes::multiplyingOperator, currentToken.lexeme);
+    return new node(nodeTypes::multiplyingOperator, currentToken.lexeme, currentToken.ln);
   }
   tokenstream.rewind();
   return nullptr;
