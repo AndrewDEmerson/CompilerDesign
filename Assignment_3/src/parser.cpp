@@ -512,7 +512,7 @@ node* parser::parseRepetitiveStatement(lex::tokenStream& tokenstream) {
         currentNode->attachChild(childNode);
         return currentNode;
     }
-    return nullptr
+    return nullptr;
 }
 
 node* parser::parseRepeatStatement(lex::tokenStream& tokenstream) {
@@ -528,7 +528,7 @@ node* parser::parseRepeatStatement(lex::tokenStream& tokenstream) {
         }
         currentNode->attachChild(child1);
         while (tokenstream.nextToken().type == lex::tokentypes::SEMICOLON) {
-            loopChild = parseStatement();
+            loopChild = parseStatement(tokenstream);
             if (loopChild == nullptr) {
                 throw "parserRepeatStatement: expected statement";
             }
@@ -556,7 +556,7 @@ node* parser::parseForStatement(lex::tokenStream& tokenstream) {
     node* child3;
     if (tokenstream.nextToken().type == lex::tokentypes::FOR) {
         currentNode = new node(nodeTypes::forStatement);
-        child1 = controlVariable(tokenstream);
+        child1 = parsecontrolVariable(tokenstream);
         if (child1 == nullptr) {
             throw "parseForStatement: expected control variable";
         }
@@ -590,7 +590,7 @@ node* parser::parseForList(lex::tokenStream& tokenstream) {
     child1 = parseInitialValue(tokenstream);
     if (child1 != nullptr) {
         currentNode = new node(nodeTypes::forList);
-        if (tokenstream.nextToken() != lex::tokentypes::TO) {
+        if (tokenstream.nextToken().type != lex::tokentypes::TO) {
             tokenstream.rewind();
             if (tokenstream.nextToken() != lex::tokentypes::DOWNTO) {
                 throw "parseForList: expected TO or DOWNTO";
