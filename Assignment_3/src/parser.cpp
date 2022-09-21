@@ -79,6 +79,9 @@ node *parser::parseIfStatement(lex::tokenStream &tokenstream) {
   if (child2 == nullptr) {
     throw "parseIfStatement: expected statement after ELSE";
   }
+  currentNode = new node(nodeTypes::if_statement);
+  currentNode->attachChild(child);
+  currentNode->attachChild(child2);
   currentNode->attachChild(child3);
   return currentNode;
 }
@@ -99,7 +102,9 @@ node *parser::parseExpression(lex::tokenStream &tokenstream) {
       node *child3 = parseSimpleExpression(tokenstream);
       if (child3 != nullptr) {
         node *currentNode = new node(nodeTypes::expression);
-        currentNode = child3;
+        currentNode->attachChild(child);
+        currentNode->attachChild(child2);
+        currentNode->attachChild(child3);
         return currentNode;
       }
       throw "parseExpression: expected simple expression after relation "
@@ -123,7 +128,10 @@ node *parser::parseSimpleExpression(lex::tokenStream &tokenstream) {
     if (child2 != nullptr) {
       node *child3 = parseSimpleExpression(tokenstream);
       if (child3 != nullptr) {
-        currentNode = child3;
+        currentNode = new node(nodeTypes::add);
+        currentNode->attachChild(child);
+        currentNode->attachChild(child2);
+        currentNode->attachChild(child3);
         return currentNode;
       }
       throw "parseSimpleExpression: expected simple expresssion after TERM "
@@ -167,14 +175,10 @@ node *parser::parseTerm(lex::tokenStream &tokenstream) {
       }
       throw "parseTerm: expected TERM after MULTIPLYING OPERATOR";
     }
-<<<<<<< HEAD
     if (short_print)
       return child;
     currentNode = new node(nodeTypes::term);
     currentNode->attachChild(child);
-=======
-    currentNode = child;
->>>>>>> 3edc24c (Node return changes)
     return currentNode;
   }
   return nullptr;
@@ -186,27 +190,19 @@ node *parser::parseFactor(lex::tokenStream &tokenstream) {
   //<Variable>
   child = parseVariable(tokenstream);
   if (child != nullptr) {
-<<<<<<< HEAD
     if (short_print)
       return child;
     currentNode = new node(nodeTypes::factor);
     currentNode->attachChild(child);
-=======
-    currentNode = child;
->>>>>>> 3edc24c (Node return changes)
     return currentNode;
   }
   //<Unsigned Constant>
   child = parseUnsignedConstant(tokenstream);
   if (child != nullptr) {
-<<<<<<< HEAD
     if (short_print)
       return child;
     currentNode = new node(nodeTypes::factor);
     currentNode->attachChild(child);
-=======
-    currentNode = child;
->>>>>>> 3edc24c (Node return changes)
     return currentNode;
   }
   //< (Expression) >
@@ -214,14 +210,10 @@ node *parser::parseFactor(lex::tokenStream &tokenstream) {
     child = parseExpression(tokenstream);
     if (child != nullptr) {
       if (tokenstream.nextToken().type == lex::tokentypes::RPAREN) {
-<<<<<<< HEAD
         if (short_print)
           return child;
         currentNode = new node(nodeTypes::factor);
         currentNode->attachChild(child);
-=======
-        currentNode = child;
->>>>>>> 3edc24c (Node return changes)
         return currentNode;
       }
     }
@@ -412,9 +404,11 @@ node *parser::parseAssignmentStatement(lex::tokenStream &tokenstream) {
   child = parseVariable(tokenstream);
   if (child != nullptr) {
     if (tokenstream.nextToken().type == lex::tokentypes::ASSIGN) {
+      currentNode = new node(nodeTypes::assignmentStatement);
       node *child2 = parseExpression(tokenstream);
       if (child2 != nullptr) {
-        currentNode = child2;
+        currentNode->attachChild(child);
+        currentNode->attachChild(child2);
         return currentNode;
       }
     }
@@ -428,21 +422,18 @@ node *parser::parseSimpleStatement(lex::tokenStream &tokenstream) {
   node *currentNode;
   child = parseAssignmentStatement(tokenstream);
   if (child != nullptr) {
-<<<<<<< HEAD
-    if (short_print)
-      return child;
-    currentNode = new node(nodeTypes::simpleStatement);
-    currentNode->attachChild(child);
-=======
-    currentNode = child;
->>>>>>> 3edc24c (Node return changes)
-    return currentNode;
-  }
-  child = parseGoToStatement(tokenstream);
-  if (child != nullptr) {
+    // // if (short_print)
+    // //   return child;
     // currentNode = new node(nodeTypes::simpleStatement);
     // currentNode->attachChild(child);
     // return currentNode;
+    return child;
+  }
+  child = parseGoToStatement(tokenstream);
+  if (child != nullptr) {
+    currentNode = new node(nodeTypes::simpleStatement);
+    currentNode->attachChild(child);
+    return currentNode;
     return child;
   }
   return nullptr;

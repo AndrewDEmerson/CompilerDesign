@@ -20,6 +20,8 @@ void node::printTree(int level) {
     std::cout << "  ";
   }
   std::cout << "<" << nodeNames[mytype];
+  if (mytype == nodeTypes::program) 
+    std::cout << " : " << id;
   if (mytype == nodeTypes::unsignedInteger || mytype == nodeTypes::label) {
     std::cout << " : " << *static_cast<int*>(value);
   } else if (mytype == nodeTypes::variable || mytype == nodeTypes::multiplyingOperator || mytype == nodeTypes::addingOperator 
