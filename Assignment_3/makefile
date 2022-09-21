@@ -34,3 +34,4 @@ $(OBJ)/%.o: $(SRC)/%.cpp
 
 clean:
 	rm -rf ./bin
+	rm "out.txt"
