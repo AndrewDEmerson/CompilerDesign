@@ -38,6 +38,7 @@ enum nodeTypes{
   initialValue,
   finalValue,
   program,
+  withStatement,
 };
 
 static std::string nodeNames[] = {
