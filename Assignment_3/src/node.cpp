@@ -4,9 +4,11 @@
 #include <fstream>
 
 node::node(nodeTypes nt) : mytype(nt) {}
-
-node::node(nodeTypes nt, std::string name)
-    : mytype(nt), id(name) {}
+node::node(nodeTypes nt, int ln) : mytype(nt), lnum(ln) {}
+node::node(nodeTypes nt, std::string name) : mytype(nt), id(name) {}
+node::node(nodeTypes nt, std::string name, int ln)
+    : mytype(nt), id(name), lnum(ln) {}
+node::node(nodeTypes nt, void *val, int ln) : mytype(nt), value(val), lnum(ln) {}
 node::node(nodeTypes nt, void *val) : mytype(nt), value(val) {}
 
 nodeTypes node::type() { return mytype; }
@@ -77,3 +79,7 @@ void node::setLnum(int a){
 int node::retLnum(){
   return lnum;
 }
+
+/*
+ << " Line number: " << lnum
+*/

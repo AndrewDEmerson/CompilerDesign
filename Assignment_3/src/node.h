@@ -84,7 +84,10 @@ static std::string nodeNames[] = {
 class node{
   public:
     node(nodeTypes);
+    node(nodeTypes, int);
+    node(nodeTypes, std::string, int);
     node(nodeTypes, std::string);
+    node(nodeTypes, void*, int);
     node(nodeTypes, void*);
     nodeTypes type();
     void attachChild(node*);
