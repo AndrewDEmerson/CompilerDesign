@@ -37,6 +37,7 @@ public:
   node* parseInitialValue(lex::tokenStream&);
   node* parseFinalValue(lex::tokenStream&);
   node* parseControlVariable(lex::tokenStream&);
+  node* parseProgram(lex::tokenStream&);
   
   void logError(const char *err);
   symbolTable symTab;

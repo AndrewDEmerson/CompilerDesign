@@ -16,14 +16,39 @@ int main() {
   node *head;
   parser prse;
   try {
-    //prse.short_print = false;
-    head = prse.parseStatement(tokenstream);
+    // prse.short_print = false;
+    head = prse.parseProgram(tokenstream);
     head->printTree();
     prse.symTab.printTable();
   } catch (const char *error) {
     std::cerr << "Could not recover from error: " << error << "\nExiting"
               << std::endl;
   }
+}
+
+node *parser::parseProgram(lex::tokenStream &tokenstream) {
+  node *child;
+  node *currentNode;
+  if (tokenstream.nextToken().type != lex::tokentypes::PROGRAM) {
+    throw "Parse Program: expected PROGRAM";
+  }
+  lex::token id = tokenstream.nextToken();
+  if (id.type != lex::tokentypes::IDENTIFIER) {
+    throw "Expected Identifier";
+  }
+  if (tokenstream.nextToken().type != lex::tokentypes::SEMICOLON) {
+    throw "Parse Program: expected PROGRAM";
+  }
+  child = parseCompoundStatement(tokenstream);
+  if (child == nullptr){
+    throw "Parse Program: expected compound statement";
+  }
+  if (tokenstream.nextToken().type != lex::tokentypes::PERIOD) {
+    throw "Parse Program: expected PERIOD at end of program";
+  }
+  currentNode = new node(nodeTypes::program, id.lexeme);
+  currentNode->attachChild(child);
+  return currentNode;
 }
 
 node *parser::parseIfStatement(lex::tokenStream &tokenstream) {
@@ -495,27 +520,16 @@ node *parser::parseCompoundStatement(lex::tokenStream &tokenstream) {
         throw "parseCompoundStatement: expected statement";
       }
       currentNode->attachChild(child);
+      if (tokenstream.nextToken().type != lex::tokentypes::SEMICOLON) {
+        tokenstream.rewind();
+      }
       if (tokenstream.nextToken().type == lex::tokentypes::END) {
         if (tokenstream.nextToken().type != lex::tokentypes::SEMICOLON) {
-          logError("parseCompoundStatement: expected semicolon");
-          tokenstream.fastForward(lex::tokentypes::SEMICOLON);
+          tokenstream.rewind();
         }
         return currentNode;
       } else {
         tokenstream.rewind();
-        if (tokenstream.nextToken().type != lex::tokentypes::SEMICOLON) {
-          logError("parseCompoundStatement: expected semicolon");
-          tokenstream.fastForward(lex::tokentypes::SEMICOLON);
-        } else {
-          if (tokenstream.nextToken().type == lex::tokentypes::END) {
-            if (tokenstream.nextToken().type != lex::tokentypes::SEMICOLON) {
-              logError("parseCompoundStatement: expected semicolon");
-              tokenstream.fastForward(lex::tokentypes::SEMICOLON);
-            }
-            return currentNode;
-          }
-          tokenstream.rewind();
-        }
       }
     }
   }
@@ -559,7 +573,6 @@ node *parser::parseRepetitiveStatement(lex::tokenStream &tokenstream) {
     currentNode->attachChild(childNode);
     return currentNode;
   }
-  tokenstream.rewind();
   childNode = parseRepeatStatement(tokenstream);
   if (childNode != nullptr) {
     if (short_print)
@@ -568,7 +581,6 @@ node *parser::parseRepetitiveStatement(lex::tokenStream &tokenstream) {
     currentNode->attachChild(childNode);
     return currentNode;
   }
-  tokenstream.rewind();
   childNode = parseForStatement(tokenstream);
   if (childNode != nullptr) {
     if (short_print)
@@ -595,7 +607,9 @@ node *parser::parseRepeatStatement(lex::tokenStream &tokenstream) {
     while (tokenstream.nextToken().type == lex::tokentypes::SEMICOLON) {
       loopChild = parseStatement(tokenstream);
       if (loopChild == nullptr) {
-        throw "parserRepeatStatement: expected statement";
+        tokenstream.nextToken();
+        break; //last statement may or may not have a semicolon
+        //throw "parserRepeatStatement: expected statement";
       }
       currentNode->attachChild(loopChild);
     }

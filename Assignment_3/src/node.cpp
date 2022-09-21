@@ -23,7 +23,8 @@ void node::printTree(int level) {
              mytype == nodeTypes::multiplyingOperator ||
              mytype == nodeTypes::addingOperator ||
              mytype == nodeTypes::relationalOperator ||
-             mytype == nodeTypes::sign) {
+             mytype == nodeTypes::sign || 
+             mytype == nodeTypes::program) {
     std::cout << ": " << id;
   } else if (mytype == nodeTypes::unsignedReal) {
     std::cout << ": " << *static_cast<float*>(value);

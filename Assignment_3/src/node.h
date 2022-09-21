@@ -37,6 +37,7 @@ enum nodeTypes{
   controlVariable,
   initialValue,
   finalValue,
+  program,
 };
 
 static std::string nodeNames[] = {
@@ -73,6 +74,7 @@ static std::string nodeNames[] = {
   "controlVariable",
   "initialValue",
   "finalValue",
+  "program"
 };
 
 class node{
