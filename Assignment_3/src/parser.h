@@ -41,4 +41,5 @@ public:
 
 private:
   int numErrors = 0;
+  const bool short_print = true;
 };
