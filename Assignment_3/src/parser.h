@@ -41,7 +41,7 @@ public:
   node* parseCaseLabelList(lex::tokenStream&);
   node* parseCaseListElement(lex::tokenStream&);
   node* parseCaseStatement(lex::tokenStream&);
-
+  node *parseWithStatement(lex::tokenStream&);
 
   void logError(const char *err);
   symbolTable symTab;

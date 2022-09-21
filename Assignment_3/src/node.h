@@ -40,7 +40,8 @@ enum nodeTypes{
   program,
   labelList,
   caseListElement,
-  caseStatement
+  caseStatement,
+  withStatement,
 };
 
 static std::string nodeNames[] = {
@@ -80,7 +81,8 @@ static std::string nodeNames[] = {
   "program",
   "labelList",
   "caseListElement",
-  "caseStatement"
+  "caseStatement",
+  "withStatement"
 };
 
 class node{

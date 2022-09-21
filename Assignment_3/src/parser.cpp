@@ -467,6 +467,14 @@ node *parser::parseStructuredStatement(lex::tokenStream &tokenstream) {
     currentNode->attachChild(child);
     return currentNode;
   }
+  child = parseWithStatement(tokenstream);
+  if (child != nullptr) {
+      if (short_print)
+          return child;
+      currentNode = new node(nodeTypes::structuredStatement);
+      currentNode->attachChild(child);
+      return currentNode;
+  }
   return nullptr;
 }
 
@@ -643,9 +651,9 @@ node *parser::parseForStatement(lex::tokenStream &tokenstream) {
   node *child3;
   if (tokenstream.nextToken().type == lex::tokentypes::FOR) {
     currentNode = new node(nodeTypes::forStatement);
-    child1 = parseControlVariable(tokenstream);
+    child1 = parseVariable(tokenstream);
     if (child1 == nullptr) {
-      throw "parseForStatement: expected control variable";
+      throw "parseForStatement: expected variable";
     }
     if (tokenstream.nextToken().type != lex::tokentypes::ASSIGN) {
       throw "parseForStatement: expected assignment";
@@ -654,9 +662,9 @@ node *parser::parseForStatement(lex::tokenStream &tokenstream) {
     if (child2 == nullptr) {
       throw "parseForStatement: expected for list";
     }
-    if (tokenstream.nextToken().type != lex::tokentypes::DOWNTO) {
-      throw "parseForStatement: expected DOWNTO";
-    }
+    //if (tokenstream.nextToken().type != lex::tokentypes::DOWNTO) {
+    //  throw "parseForStatement: expected DOWNTO";
+    //}
     child3 = parseFinalValue(tokenstream);
     if (child3 == nullptr) {
       throw "parseForStatement: expected final value";
@@ -719,7 +727,35 @@ node *parser::parseFinalValue(lex::tokenStream &tokenstream) {
   return nullptr;
 }
 
-node *parser::parseControlVariable(lex::tokenStream &tokenstream) {}
+node *parser::parseWithStatement(lex::tokenStream &tokenstream) {
+    node *currentNode;
+    node *childNode1;
+    node* childNode2;
+    if (tokenstream.nextToken().type == lex::tokentypes::WITH) {
+        currentNode = new node(nodeTypes::withStatement);
+        childNode1 = parseVariable(tokenstream);
+        if (childNode1 == nullptr) {
+            throw "parseWithStatement: expected variable";
+        }
+        currentNode->attachChild(childNode1);
+        if (tokenstream.nextToken().type != lex::tokentypes::DO) {
+            throw "parseWithStatement: expected DO";
+        }
+        childNode2 = parseStatement(tokenstream);
+        if (childNode2 == nullptr) {
+            throw "parseWithStatement: expted statement";
+        }
+        currentNode->attachChild(childNode2);
+        return currentNode;
+    }
+    tokenstream.rewind();
+    return nullptr;
+}
+
+/*node *parser::parseControlVariable(lex::tokenStream &tokenstream) {
+
+}
+--subbed out for standard parseVariable function instead*/
 
 node *parser::parseCaseLabelList(lex::tokenStream &tokenstream) {
   node *child;
@@ -804,3 +840,4 @@ node *parseTemplate(lex::tokenStream &tokenstream) {
   return nullptr;
 }
 */
+//with statement will fall under structured statement along with repetitive statement
