@@ -481,6 +481,14 @@ node *parser::parseConditionalStatement(lex::tokenStream &tokenstream) {
     currentNode->attachChild(child);
     return currentNode;
   }
+  child = parseCaseStatement(tokenstream);
+  if (child != nullptr) {
+    if (short_print)
+      return child;
+    currentNode = new node(nodeTypes::conditionalStatement);
+    currentNode->attachChild(child);
+    return currentNode;
+  }
   return nullptr;
 }
 
@@ -712,6 +720,76 @@ node *parser::parseFinalValue(lex::tokenStream &tokenstream) {
 }
 
 node *parser::parseControlVariable(lex::tokenStream &tokenstream) {}
+
+node *parser::parseCaseLabelList(lex::tokenStream &tokenstream) {
+  node *child;
+  node *currentNode;
+  child = parseUnsignedInteger(tokenstream);
+  if (child == nullptr) return nullptr;
+  currentNode = new node(nodeTypes::labelList);
+  currentNode->attachChild(child);
+  while (tokenstream.nextToken().type == lex::tokentypes::COMMA){
+    child = parseUnsignedInteger(tokenstream);
+    if (child == nullptr) throw "LabelList Expected Int";
+    currentNode->attachChild(child);
+  }
+  tokenstream.rewind();
+  return currentNode;
+}
+
+node *parser::parseCaseListElement(lex::tokenStream &tokenstream) {
+  node *child;
+  node *currentNode;
+  child = parseCaseLabelList(tokenstream);
+  if(child == nullptr) throw "expected case list label";
+  currentNode = new node(nodeTypes::caseListElement);
+  currentNode->attachChild(child);
+  if (tokenstream.nextToken().type != lex::tokentypes::COLON) throw "ParseCaseListElement: expected :";
+  child = parseStatement(tokenstream);
+  currentNode->attachChild(child);
+  return currentNode;
+}
+
+node *parser::parseCaseStatement(lex::tokenStream &tokenstream) {
+  node *child;
+  node *currentNode;
+  if (tokenstream.nextToken().type != lex::tokentypes::CASE) {
+    tokenstream.rewind();
+    return nullptr;
+  }
+  child = parseExpression(tokenstream);
+  if (child == nullptr)
+    throw "parseCaseStatement: Expexted expression";
+  if (tokenstream.nextToken().type != lex::tokentypes::OF) {
+    tokenstream.rewind();
+    throw "parseCaseStatement: Expected OF";
+  }
+  currentNode = new node(nodeTypes::caseStatement);
+  currentNode->attachChild(child);
+  child = parseCaseListElement(tokenstream);
+  if (child == nullptr)
+    throw "parseCaseStatement: CaseListElement";
+  currentNode->attachChild(child);
+  while (tokenstream.nextToken().type == lex::tokentypes::SEMICOLON) {
+    if (tokenstream.nextToken().type == lex::tokentypes::END){
+      return currentNode;
+    }
+    tokenstream.rewind();
+    child = parseCaseListElement(tokenstream);
+    if (child == nullptr) {
+      tokenstream.nextToken();
+      break; // last statement may or may not have a semicolon
+      // throw "parserRepeatStatement: expected statement";
+    }
+    currentNode->attachChild(child);
+  }
+  tokenstream.rewind();
+  if (tokenstream.nextToken().type != lex::tokentypes::END) {
+    tokenstream.rewind();
+    throw "parseCaseStatement: Expexted end";
+  }
+  return currentNode;
+}
 
 /*
 node *parseTemplate(lex::tokenStream &tokenstream) {

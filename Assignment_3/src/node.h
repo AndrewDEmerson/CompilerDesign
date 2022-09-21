@@ -38,6 +38,9 @@ enum nodeTypes{
   initialValue,
   finalValue,
   program,
+  labelList,
+  caseListElement,
+  caseStatement
 };
 
 static std::string nodeNames[] = {
@@ -74,7 +77,10 @@ static std::string nodeNames[] = {
   "controlVariable",
   "initialValue",
   "finalValue",
-  "program"
+  "program",
+  "labelList",
+  "caseListElement",
+  "caseStatement"
 };
 
 class node{

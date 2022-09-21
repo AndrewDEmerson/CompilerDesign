@@ -38,7 +38,11 @@ public:
   node* parseFinalValue(lex::tokenStream&);
   node* parseControlVariable(lex::tokenStream&);
   node* parseProgram(lex::tokenStream&);
-  
+  node* parseCaseLabelList(lex::tokenStream&);
+  node* parseCaseListElement(lex::tokenStream&);
+  node* parseCaseStatement(lex::tokenStream&);
+
+
   void logError(const char *err);
   symbolTable symTab;
   bool short_print = true;
