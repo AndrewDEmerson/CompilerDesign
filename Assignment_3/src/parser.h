@@ -1,6 +1,7 @@
 #include "node.h"
 #include "tokenizer.h"
 #include "tokenstream.h"
+#include "symbolTable.h"
 
 class parser {
 public:
@@ -38,8 +39,9 @@ public:
   node* parseControlVariable(lex::tokenStream&);
   
   void logError(const char *err);
+  symbolTable symTab;
+  bool short_print = true;
 
 private:
   int numErrors = 0;
-  const bool short_print = true;
 };

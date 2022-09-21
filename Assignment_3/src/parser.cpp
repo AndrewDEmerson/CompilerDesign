@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "node.h"
+#include "symbolTable.h"
 #include "tokenizer.h"
 #include <cstddef>
 #include <cstdio>
@@ -15,8 +16,10 @@ int main() {
   node *head;
   parser prse;
   try {
+    //prse.short_print = false;
     head = prse.parseStatement(tokenstream);
     head->printTree();
+    prse.symTab.printTable();
   } catch (const char *error) {
     std::cerr << "Could not recover from error: " << error << "\nExiting"
               << std::endl;
@@ -196,6 +199,7 @@ node *parser::parseFactor(lex::tokenStream &tokenstream) {
 node *parser::parseVariable(lex::tokenStream &tokenstream) {
   lex::token currentToken = tokenstream.nextToken();
   if (currentToken.type == lex::tokentypes::IDENTIFIER) {
+    symTab.updateTable(currentToken.lexeme);
     return new node(nodeTypes::variable, currentToken.lexeme);
   }
   tokenstream.rewind();
@@ -549,6 +553,8 @@ node *parser::parseRepetitiveStatement(lex::tokenStream &tokenstream) {
   node *childNode;
   childNode = parseWhileStatement(tokenstream);
   if (childNode != nullptr) {
+    if (short_print)
+      return childNode;
     currentNode = new node(nodeTypes::repetitiveStatement);
     currentNode->attachChild(childNode);
     return currentNode;
@@ -556,6 +562,8 @@ node *parser::parseRepetitiveStatement(lex::tokenStream &tokenstream) {
   tokenstream.rewind();
   childNode = parseRepeatStatement(tokenstream);
   if (childNode != nullptr) {
+    if (short_print)
+      return childNode;
     currentNode = new node(nodeTypes::repetitiveStatement);
     currentNode->attachChild(childNode);
     return currentNode;
@@ -563,6 +571,8 @@ node *parser::parseRepetitiveStatement(lex::tokenStream &tokenstream) {
   tokenstream.rewind();
   childNode = parseForStatement(tokenstream);
   if (childNode != nullptr) {
+    if (short_print)
+      return childNode;
     currentNode = new node(nodeTypes::repetitiveStatement);
     currentNode->attachChild(childNode);
     return currentNode;

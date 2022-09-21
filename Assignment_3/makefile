@@ -6,6 +6,7 @@ OBJECTS += lexbuffer.o
 OBJECTS += tokenizer.o
 OBJECTS += tokenstream.o
 OBJECTS += node.o
+OBJECTS += symbolTable.o
 
 # Directories
 SRC = src
