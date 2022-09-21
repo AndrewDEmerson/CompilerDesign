@@ -662,12 +662,12 @@ node *parser::parseForStatement(lex::tokenStream &tokenstream) {
     if (child2 == nullptr) {
       throw "parseForStatement: expected for list";
     }
-    //if (tokenstream.nextToken().type != lex::tokentypes::DOWNTO) {
-    //  throw "parseForStatement: expected DOWNTO";
-    //}
-    child3 = parseFinalValue(tokenstream);
+    if (tokenstream.nextToken().type != lex::tokentypes::DO) {
+      throw "parseForStatement: expected DO";
+    }
+    child3 = parseStatement(tokenstream);
     if (child3 == nullptr) {
-      throw "parseForStatement: expected final value";
+      throw "parseForStatement: expected statement";
     }
     currentNode->attachChild(child1);
     currentNode->attachChild(child2);
@@ -682,7 +682,7 @@ node *parser::parseForList(lex::tokenStream &tokenstream) {
   node *currentNode;
   node *child1;
   node *child2;
-  child1 = parseInitialValue(tokenstream);
+  child1 = parseExpression(tokenstream);
   if (child1 != nullptr) {
     currentNode = new node(nodeTypes::forList);
     if (tokenstream.nextToken().type != lex::tokentypes::TO) {
@@ -691,37 +691,13 @@ node *parser::parseForList(lex::tokenStream &tokenstream) {
         throw "parseForList: expected TO or DOWNTO";
       }
     }
-    child2 = parseFinalValue(tokenstream);
+    child2 = parseExpression(tokenstream);
     if (child2 == nullptr) {
       throw "parseForList: expected final value";
     }
     currentNode->attachChild(child1);
     currentNode->attachChild(child2);
     return currentNode;
-  }
-  tokenstream.rewind();
-  return nullptr;
-}
-
-node *parser::parseInitialValue(lex::tokenStream &tokenstream) {
-  node *currentNode;
-  node *child;
-  child = parseExpression(tokenstream);
-  if (child != nullptr) {
-    currentNode = new node(nodeTypes::initialValue);
-    currentNode->attachChild(child);
-  }
-  tokenstream.rewind();
-  return nullptr;
-}
-
-node *parser::parseFinalValue(lex::tokenStream &tokenstream) {
-  node *currentNode;
-  node *child;
-  child = parseExpression(tokenstream);
-  if (child != nullptr) {
-    currentNode = new node(nodeTypes::finalValue);
-    currentNode->attachChild(child);
   }
   tokenstream.rewind();
   return nullptr;
@@ -751,11 +727,6 @@ node *parser::parseWithStatement(lex::tokenStream &tokenstream) {
     tokenstream.rewind();
     return nullptr;
 }
-
-/*node *parser::parseControlVariable(lex::tokenStream &tokenstream) {
-
-}
---subbed out for standard parseVariable function instead*/
 
 node *parser::parseCaseLabelList(lex::tokenStream &tokenstream) {
   node *child;

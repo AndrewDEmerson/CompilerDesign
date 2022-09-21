@@ -34,9 +34,6 @@ public:
   node *parseRepeatStatement(lex::tokenStream&);
   node* parseForStatement(lex::tokenStream&);
   node* parseForList(lex::tokenStream&);
-  node* parseInitialValue(lex::tokenStream&);
-  node* parseFinalValue(lex::tokenStream&);
-  node* parseControlVariable(lex::tokenStream&);
   node* parseProgram(lex::tokenStream&);
   node* parseCaseLabelList(lex::tokenStream&);
   node* parseCaseListElement(lex::tokenStream&);

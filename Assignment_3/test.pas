@@ -26,8 +26,8 @@ begin
     y:=y*2;
   end
 (*Test For Statement*)
-  (*for i := 0 to 10 do
-    x:= x*10;*)
+  for i := 0 to 10 do
+    x:= x*10
 (*Test With Statement*)
   with myRecord do
     begin
