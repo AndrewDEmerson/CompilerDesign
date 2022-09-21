@@ -10,12 +10,7 @@ begin
    y:=2;
  until
    y = 2;
-(*Test Case Statement*)
- case grade of
-     1 : Apple:=100;
-     2: Bannana:=200;
-     3,4: Cherry:= 300
-  end;     
+ 
 (*Test While Statement*)
 while x < 10 do
  begin

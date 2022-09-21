@@ -16,7 +16,8 @@ int main() {
   node *head;
   parser prse;
   try {
-    head = prse.parseStatement(tokenstream);
+    // prse.short_print = false;
+    head = prse.parseProgram(tokenstream);
     head->printTree();
     prse.symTab.printTable();
     head->printFile();
@@ -70,7 +71,8 @@ node *parser::parseIfStatement(lex::tokenStream &tokenstream) {
     throw "parseIfStatement: expected statement after THEN";
   }
   node *currentNode = new node(nodeTypes::if_statement);
-  currentNode = child2;
+  currentNode->attachChild(child);
+  currentNode->attachChild(child2);
   if (tokenstream.nextToken().type != lex::tokentypes::ELSE) {
     tokenstream.rewind();
     return currentNode;

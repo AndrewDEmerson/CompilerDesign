@@ -232,3 +232,249 @@ testing
     </whileStatement>
   </compoundStatement>
 </program>
+<program : HELLOWORLD : HELLOWORLD>
+  <compoundStatement>
+    <assignmentStatement>
+      <variable : X />
+      <unsignedInteger : 0 />
+    </assignmentStatement>
+    <assignmentStatement>
+      <variable : Y />
+      <unsignedInteger : 5 />
+    </assignmentStatement>
+    <assignmentStatement>
+      <variable : SUPERVARIABLENAME />
+      <simpleExpression>
+        <sign : - />
+        <unsignedInteger : 1 />
+      </simpleExpression>
+    </assignmentStatement>
+    <repeatStatement>
+      <assignmentStatement>
+        <variable : X />
+        <unsignedInteger : 1 />
+      </assignmentStatement>
+      <assignmentStatement>
+        <variable : Y />
+        <unsignedInteger : 2 />
+      </assignmentStatement>
+      <expression>
+        <variable : Y />
+        <relationalOperator : = />
+        <unsignedInteger : 2 />
+      </expression>
+    </repeatStatement>
+    <whileStatement>
+      <expression>
+        <variable : X />
+        <relationalOperator : < />
+        <unsignedInteger : 10 />
+      </expression>
+      <compoundStatement>
+        <if_statement>
+          <expression>
+            <term>
+              <variable : X />
+              <multiplyingOperator : * />
+              <unsignedInteger : 2 />
+            </term>
+            <relationalOperator : < />
+            <>
+              <unsignedInteger : 10 />
+              <addingOperator : + />
+              <unsignedInteger : 3 />
+            </>
+          </expression>
+          <assignmentStatement>
+            <variable : X />
+            <>
+              <variable : X />
+              <addingOperator : + />
+              <unsignedInteger : 1 />
+            </>
+          </assignmentStatement>
+          <assignmentStatement>
+            <variable : X />
+            <>
+              <variable : X />
+              <addingOperator : + />
+              <unsignedInteger : 2 />
+            </>
+          </assignmentStatement>
+        </if_statement>
+        <assignmentStatement>
+          <variable : Y />
+          <term>
+            <variable : Y />
+            <multiplyingOperator : * />
+            <unsignedInteger : 2 />
+          </term>
+        </assignmentStatement>
+      </compoundStatement>
+    </whileStatement>
+  </compoundStatement>
+</program>
+<program : HELLOWORLD : HELLOWORLD>
+  <compoundStatement>
+    <assignmentStatement>
+      <variable : X />
+      <unsignedInteger : 0 />
+    </assignmentStatement>
+    <assignmentStatement>
+      <variable : Y />
+      <unsignedInteger : 5 />
+    </assignmentStatement>
+    <assignmentStatement>
+      <variable : SUPERVARIABLENAME />
+      <simpleExpression>
+        <sign : - />
+        <unsignedInteger : 1 />
+      </simpleExpression>
+    </assignmentStatement>
+    <repeatStatement>
+      <assignmentStatement>
+        <variable : X />
+        <unsignedInteger : 1 />
+      </assignmentStatement>
+      <assignmentStatement>
+        <variable : Y />
+        <unsignedInteger : 2 />
+      </assignmentStatement>
+      <expression>
+        <variable : Y />
+        <relationalOperator : = />
+        <unsignedInteger : 2 />
+      </expression>
+    </repeatStatement>
+    <whileStatement>
+      <expression>
+        <variable : X />
+        <relationalOperator : < />
+        <unsignedInteger : 10 />
+      </expression>
+      <compoundStatement>
+        <if_statement>
+          <expression>
+            <term>
+              <variable : X />
+              <multiplyingOperator : * />
+              <unsignedInteger : 2 />
+            </term>
+            <relationalOperator : < />
+            <>
+              <unsignedInteger : 10 />
+              <addingOperator : + />
+              <unsignedInteger : 3 />
+            </>
+          </expression>
+          <assignmentStatement>
+            <variable : X />
+            <>
+              <variable : X />
+              <addingOperator : + />
+              <unsignedInteger : 1 />
+            </>
+          </assignmentStatement>
+          <assignmentStatement>
+            <variable : X />
+            <>
+              <variable : X />
+              <addingOperator : + />
+              <unsignedInteger : 2 />
+            </>
+          </assignmentStatement>
+        </if_statement>
+        <assignmentStatement>
+          <variable : Y />
+          <term>
+            <variable : Y />
+            <multiplyingOperator : * />
+            <unsignedInteger : 2 />
+          </term>
+        </assignmentStatement>
+      </compoundStatement>
+    </whileStatement>
+  </compoundStatement>
+</program>
+<program : HELLOWORLD : HELLOWORLD>
+  <compoundStatement>
+    <assignmentStatement>
+      <variable : X />
+      <unsignedInteger : 0 />
+    </assignmentStatement>
+    <assignmentStatement>
+      <variable : Y />
+      <unsignedInteger : 5 />
+    </assignmentStatement>
+    <assignmentStatement>
+      <variable : SUPERVARIABLENAME />
+      <simpleExpression>
+        <sign : - />
+        <unsignedInteger : 1 />
+      </simpleExpression>
+    </assignmentStatement>
+    <repeatStatement>
+      <assignmentStatement>
+        <variable : X />
+        <unsignedInteger : 1 />
+      </assignmentStatement>
+      <assignmentStatement>
+        <variable : Y />
+        <unsignedInteger : 2 />
+      </assignmentStatement>
+      <expression>
+        <variable : Y />
+        <relationalOperator : = />
+        <unsignedInteger : 2 />
+      </expression>
+    </repeatStatement>
+    <whileStatement>
+      <expression>
+        <variable : X />
+        <relationalOperator : < />
+        <unsignedInteger : 10 />
+      </expression>
+      <compoundStatement>
+        <if_statement>
+          <expression>
+            <term>
+              <variable : X />
+              <multiplyingOperator : * />
+              <unsignedInteger : 2 />
+            </term>
+            <relationalOperator : < />
+            <>
+              <unsignedInteger : 10 />
+              <addingOperator : + />
+              <unsignedInteger : 3 />
+            </>
+          </expression>
+          <assignmentStatement>
+            <variable : X />
+            <>
+              <variable : X />
+              <addingOperator : + />
+              <unsignedInteger : 1 />
+            </>
+          </assignmentStatement>
+          <assignmentStatement>
+            <variable : X />
+            <>
+              <variable : X />
+              <addingOperator : + />
+              <unsignedInteger : 2 />
+            </>
+          </assignmentStatement>
+        </if_statement>
+        <assignmentStatement>
+          <variable : Y />
+          <term>
+            <variable : Y />
+            <multiplyingOperator : * />
+            <unsignedInteger : 2 />
+          </term>
+        </assignmentStatement>
+      </compoundStatement>
+    </whileStatement>
+  </compoundStatement>
+</program>

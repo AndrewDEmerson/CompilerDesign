@@ -11,7 +11,8 @@ void symbolTable::updateTable(std::string varName) {
 }
 
 void symbolTable::printTable() {
+  std::cout << "\nPrinting Symbol Table" << std::endl;
   for (int i = 0; i < entries.size(); i++) {
-    std::cout << entries[i] << std::endl;
+    std::cout << "|\t" << entries[i] << std::endl;
   }
 }
