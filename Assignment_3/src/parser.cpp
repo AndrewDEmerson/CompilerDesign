@@ -16,9 +16,9 @@ int main() {
   node *head;
   parser prse;
   try {
-    // prse.short_print = false;
-    head = prse.parseProgram(tokenstream);
+    head = prse.parseStatement(tokenstream);
     head->printTree();
+    prse.symTab.printTable();
     head->printFile();
   } catch (const char *error) {
     std::cerr << "Could not recover from error: " << error << "\nExiting"
