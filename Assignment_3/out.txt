@@ -1,0 +1,137 @@
+<program : HELLOWORLD : HELLOWORLD>
+  <compoundStatement>
+    <assignmentStatement>
+      <variable : X />
+      <unsignedInteger : 0 />
+    </assignmentStatement>
+    <assignmentStatement>
+      <variable : Y />
+      <unsignedInteger : 5 />
+    </assignmentStatement>
+    <assignmentStatement>
+      <variable : SUPERVARIABLENAME />
+      <simpleExpression>
+        <sign : - />
+        <unsignedInteger : 1 />
+      </simpleExpression>
+    </assignmentStatement>
+    <repeatStatement>
+      <assignmentStatement>
+        <variable : X />
+        <unsignedInteger : 1 />
+      </assignmentStatement>
+      <assignmentStatement>
+        <variable : Y />
+        <unsignedInteger : 2 />
+      </assignmentStatement>
+      <expression>
+        <variable : Y />
+        <relationalOperator : = />
+        <unsignedInteger : 2 />
+      </expression>
+    </repeatStatement>
+    <caseStatement>
+      <variable : GRADE />
+      <caseListElement>
+        <labelList>
+          <unsignedInteger : 1 />
+        </labelList>
+        <assignmentStatement>
+          <variable : APPLE />
+          <unsignedInteger : 100 />
+        </assignmentStatement>
+      </caseListElement>
+      <caseListElement>
+        <labelList>
+          <unsignedInteger : 2 />
+        </labelList>
+        <assignmentStatement>
+          <variable : BANNANA />
+          <unsignedInteger : 200 />
+        </assignmentStatement>
+      </caseListElement>
+      <caseListElement>
+        <labelList>
+          <unsignedInteger : 3 />
+          <unsignedInteger : 4 />
+        </labelList>
+        <assignmentStatement>
+          <variable : CHERRY />
+          <unsignedInteger : 300 />
+        </assignmentStatement>
+      </caseListElement>
+    </caseStatement>
+    <whileStatement>
+      <expression>
+        <variable : X />
+        <relationalOperator : < />
+        <unsignedInteger : 10 />
+      </expression>
+      <compoundStatement>
+        <if_statement>
+          <expression>
+            <term>
+              <variable : X />
+              <multiplyingOperator : * />
+              <unsignedInteger : 2 />
+            </term>
+            <relationalOperator : < />
+            <simpleExpression>
+              <unsignedInteger : 10 />
+              <addingOperator : + />
+              <unsignedInteger : 3 />
+            </simpleExpression>
+          </expression>
+          <assignmentStatement>
+            <variable : X />
+            <simpleExpression>
+              <variable : X />
+              <addingOperator : + />
+              <unsignedInteger : 1 />
+            </simpleExpression>
+          </assignmentStatement>
+          <assignmentStatement>
+            <variable : X />
+            <simpleExpression>
+              <variable : X />
+              <addingOperator : + />
+              <unsignedInteger : 2 />
+            </simpleExpression>
+          </assignmentStatement>
+        </if_statement>
+        <assignmentStatement>
+          <variable : Y />
+          <term>
+            <variable : Y />
+            <multiplyingOperator : * />
+            <unsignedInteger : 2 />
+          </term>
+        </assignmentStatement>
+      </compoundStatement>
+    </whileStatement>
+    <forStatement>
+      <variable : I />
+      <forList>
+        <unsignedInteger : 0 />
+        <unsignedInteger : 10 />
+      </forList>
+      <assignmentStatement>
+        <variable : X />
+        <term>
+          <variable : X />
+          <multiplyingOperator : * />
+          <unsignedInteger : 10 />
+        </term>
+      </assignmentStatement>
+    </forStatement>
+    <withStatement>
+      <variable : MYRECORD />
+      <compoundStatement>
+        <assignmentStatement>
+          <variable : RVAL />
+          <unsignedInteger : 0 />
+        </assignmentStatement>
+      </compoundStatement>
+    </withStatement>
+  </compoundStatement>
+</program>

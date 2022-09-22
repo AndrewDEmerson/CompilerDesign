@@ -10,6 +10,9 @@
 #include <ostream>
 #include <string>
 
+
+int GLOBALERROR = 0;
+
 int main(int argc, char *argv[]) {
   if (argc != 2){
     std::cout << "Please Specify the path to the source file as an argument, EXITING" << std::endl;
@@ -20,6 +23,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "Could not open file" << std::endl;
     return -1;
   }
+
   lex::tokenStream tokenstream(codefile);
   node *head;
   parser prse;
@@ -30,30 +34,52 @@ int main(int argc, char *argv[]) {
     prse.symTab.printTable();
     head->printFile();
   } catch (const char *error) {
-    std::cerr << "Could not recover from error: " << error << "\nExiting"
+    std::cerr << error << "\nExiting"
               << std::endl;
   }
 }
+
+
+void parser::panic(lex::tokenStream &tokenstream, const char *err){
+  if (GLOBALERROR==5)
+    throw "Could not recover, too many errors!";
+  GLOBALERROR++;
+
+  std::cerr << "#" << GLOBALERROR << " " << err << std::endl;
+  tokenstream.fastForward(lex::tokentypes::SEMICOLON);
+}
+
 
 node *parser::parseProgram(lex::tokenStream &tokenstream) {
   node *child;
   node *currentNode;
   if (tokenstream.nextToken().type != lex::tokentypes::PROGRAM) {
-    throw "Parse Program: expected PROGRAM";
+    // Skip IDENTIFIER condition --> call every function after 
+    // COMPOUND statement, PERIOD token
+    panic(tokenstream, "Parse Program: expected PROGRAM");
+    child = parseCompoundStatement(tokenstream);
+    if (child == nullptr){
+      throw "Parse Program: expected COMPOUND statement";
+    }
+    if (tokenstream.nextToken().type != lex::tokentypes::PERIOD) {
+      panic(tokenstream, "Parse Program: expected PERIOD at end of program");
+    }
+    throw " ";
   }
+
   lex::token id = tokenstream.nextToken();
   if (id.type != lex::tokentypes::IDENTIFIER) {
-    throw "Expected Identifier";
+    panic(tokenstream, "Parse Program: expected IDENIFIER");
   }
   if (tokenstream.nextToken().type != lex::tokentypes::SEMICOLON) {
     throw "Parse Program: expected PROGRAM";
   }
   child = parseCompoundStatement(tokenstream);
   if (child == nullptr){
-    throw "Parse Program: expected compound statement";
+    throw "Parse Program: expected COMPOUND statement";
   }
   if (tokenstream.nextToken().type != lex::tokentypes::PERIOD) {
-    throw "Parse Program: expected PERIOD at end of program";
+    panic(tokenstream, "Parse Program: expected PERIOD at end of program");
   }
   currentNode = new node(nodeTypes::program, id.lexeme);
   currentNode->attachChild(child);
@@ -67,7 +93,8 @@ node *parser::parseIfStatement(lex::tokenStream &tokenstream) {
   }
   node *child = parseExpression(tokenstream);
   if (child == nullptr) {
-    throw "parseIfStatement: expected expression after IF";
+    // throw "parseIfStatement: expected expression after IF";
+    panic(tokenstream, "parseIfStatement: expected expression after IF");
   }
   if (tokenstream.nextToken().type != lex::tokentypes::THEN) {
     // std::cerr << "parsing IF: has no keyword THEN" << std::endl;
@@ -76,7 +103,8 @@ node *parser::parseIfStatement(lex::tokenStream &tokenstream) {
   }
   node *child2 = parseStatement(tokenstream);
   if (child2 == nullptr) {
-    throw "parseIfStatement: expected statement after THEN";
+    // throw "parseIfStatement: expected statement after THEN";
+    panic(tokenstream, "parseIfStatement: expected statement after THEN");
   }
   node *currentNode = new node(nodeTypes::if_statement);
   currentNode->attachChild(child);
@@ -87,7 +115,10 @@ node *parser::parseIfStatement(lex::tokenStream &tokenstream) {
   }
   node *child3 = parseStatement(tokenstream);
   if (child2 == nullptr) {
-    throw "parseIfStatement: expected statement after ELSE";
+    // throw "parseIfStatement: expected statement after ELSE";
+    panic(tokenstream, "parseIfStatement: expected statement after ELSE");
+
+    
   }
   currentNode->attachChild(child3);
   return currentNode;
@@ -114,8 +145,9 @@ node *parser::parseExpression(lex::tokenStream &tokenstream) {
         currentNode->attachChild(child3);
         return currentNode;
       }
-      throw "parseExpression: expected simple expression after relation "
-            "operator";
+      // throw "parseExpression: expected simple expression after relation "
+      //       "operator";
+      // panic()
     }
     if (short_print)
       return child;
@@ -141,8 +173,9 @@ node *parser::parseSimpleExpression(lex::tokenStream &tokenstream) {
         currentNode->attachChild(child3);
         return currentNode;
       }
-      throw "parseSimpleExpression: expected simple expresssion after TERM "
-            "ADDINGOPERATOR";
+      // throw "parseSimpleExpression: expected simple expresssion after TERM "
+      //        "ADDINGOPERATOR";
+      panic(tokenstream, "parseSimpleExpression: expected simple expresssion after TERM\nADDINGOPERATOR");
     }
     if (short_print)
       return child;
@@ -159,7 +192,8 @@ node *parser::parseSimpleExpression(lex::tokenStream &tokenstream) {
       currentNode->attachChild(child2);
       return currentNode;
     }
-    throw "parseSimpleExpression: expected TERM after SIGN";
+    // throw "parseSimpleExpression: expected TERM after SIGN";
+    panic(tokenstream, "parseSimpleExpression: expected TERM after SIGN");
   }
   return nullptr;
 }
@@ -180,7 +214,8 @@ node *parser::parseTerm(lex::tokenStream &tokenstream) {
         currentNode->attachChild(child3);
         return currentNode;
       }
-      throw "parseTerm: expected TERM after MULTIPLYING OPERATOR";
+      // throw "parseTerm: expected TERM after MULTIPLYING OPERATOR";
+      panic(tokenstream, "parseTerm: expected TERM after MULTIPLYING OPERATOR");
     }
     if (short_print)
       return child;
@@ -224,7 +259,8 @@ node *parser::parseFactor(lex::tokenStream &tokenstream) {
         return currentNode;
       }
     }
-    throw "parseFactor: expected expression after (";
+    // throw "parseFactor: expected expression after (";
+    panic(tokenstream, "parseFactor: expected expression after (");
   }
   tokenstream.rewind();
   return nullptr;
@@ -423,7 +459,8 @@ node *parser::parseAssignmentStatement(lex::tokenStream &tokenstream) {
         return currentNode;
       }
     }
-    std::cerr << "Missformed Variable Assignment Statement" << std::endl;
+    panic(tokenstream, "Missformed Variable Assignment Statement");
+    // std::cerr << "Missformed Variable Assignment Statement" << std::endl;
   }
   return nullptr;
 }
@@ -542,7 +579,7 @@ node *parser::parseCompoundStatement(lex::tokenStream &tokenstream) {
     while (true) {
       child = parseStatement(tokenstream);
       if (child == nullptr) {
-        throw "parseCompoundStatement: expected statement";
+        // throw "parseCompoundStatement: expected statement"; 
       }
       currentNode->attachChild(child);
       if (tokenstream.nextToken().type != lex::tokentypes::SEMICOLON) {
@@ -570,15 +607,18 @@ node *parser::parseWhileStatement(lex::tokenStream &tokenstream) {
     currentNode = new node(nodeTypes::whileStatement);
     child = parseExpression(tokenstream);
     if (child == nullptr) {
-      throw "parseWhileStatement: expected expression";
+      // throw "parseWhileStatement: expected expression";
+      panic(tokenstream, "parseWhileStatement: expected expression");
     }
     currentNode->attachChild(child);
     if (tokenstream.nextToken().type != lex::tokentypes::DO) {
-      throw "parseWhileStatement: expected DO";
+      // throw "parseWhileStatement: expected DO";
+      panic(tokenstream, "parseWhileStatement: expected DO");
     }
     child2 = parseStatement(tokenstream);
     if (child2 == nullptr) {
-      throw "parseWhileStatement: expected statement";
+      // throw "parseWhileStatement: expected statement";
+      panic(tokenstream, "parseWhileStatement: expected statement");
     }
     currentNode->attachChild(child2);
     return currentNode;
@@ -626,7 +666,9 @@ node *parser::parseRepeatStatement(lex::tokenStream &tokenstream) {
     currentNode = new node(nodeTypes::repeatStatement);
     child1 = parseStatement(tokenstream);
     if (child1 == nullptr) {
-      throw "parserRepeatStatement: expected statement";
+      // throw "parserRepeatStatement: expected statement";
+      panic(tokenstream, "parseRepeatStatement: expected statement");
+
     }
     currentNode->attachChild(child1);
     while (tokenstream.nextToken().type == lex::tokentypes::SEMICOLON) {
@@ -640,11 +682,14 @@ node *parser::parseRepeatStatement(lex::tokenStream &tokenstream) {
     }
     tokenstream.rewind();
     if (tokenstream.nextToken().type != lex::tokentypes::UNTIL) {
-      throw "parserRepeatStatement: expected UNTIL";
+      // throw "parserRepeatStatement: expected UNTIL";
+      panic(tokenstream, "parseRepeatStatement: expected UNTIL");
     }
     child2 = parseExpression(tokenstream);
     if (child2 == nullptr) {
-      throw "parserRepeatStatement: expected expression";
+      // throw "parserRepeatStatement: expected expression";
+      panic(tokenstream, "parseRepeatStatement: expected expression");
+
     }
     currentNode->attachChild(child2);
     return currentNode;
@@ -662,21 +707,26 @@ node *parser::parseForStatement(lex::tokenStream &tokenstream) {
     currentNode = new node(nodeTypes::forStatement);
     child1 = parseVariable(tokenstream);
     if (child1 == nullptr) {
-      throw "parseForStatement: expected variable";
+      // throw "parseForStatement: expected variable";
+      panic(tokenstream, "parseForStatement: expected variable");
     }
     if (tokenstream.nextToken().type != lex::tokentypes::ASSIGN) {
-      throw "parseForStatement: expected assignment";
+      // throw "parseForStatement: expected assignment";
+      panic(tokenstream, "parseForStatement: expected assignment");
     }
     child2 = parseForList(tokenstream);
     if (child2 == nullptr) {
-      throw "parseForStatement: expected for list";
+      // throw "parseForStatement: expected for list";
+      panic(tokenstream, "parseForStatement: expected for list");
     }
     if (tokenstream.nextToken().type != lex::tokentypes::DO) {
-      throw "parseForStatement: expected DO";
+      // throw "parseForStatement: expected DO";
+      panic(tokenstream, "parseForStatement: expected DO");
     }
     child3 = parseStatement(tokenstream);
     if (child3 == nullptr) {
-      throw "parseForStatement: expected statement";
+      // throw "parseForStatement: expected statement";
+      panic(tokenstream, "parseForStatement: expected statement");
     }
     currentNode->attachChild(child1);
     currentNode->attachChild(child2);
@@ -697,12 +747,14 @@ node *parser::parseForList(lex::tokenStream &tokenstream) {
     if (tokenstream.nextToken().type != lex::tokentypes::TO) {
       tokenstream.rewind();
       if (tokenstream.nextToken().type != lex::tokentypes::DOWNTO) {
-        throw "parseForList: expected TO or DOWNTO";
+        // throw "parseForList: expected TO or DOWNTO";
+        panic(tokenstream, "parseForList: expected TO or DOWNTO");
       }
     }
     child2 = parseExpression(tokenstream);
     if (child2 == nullptr) {
-      throw "parseForList: expected final value";
+      // throw "parseForList: expected final value";
+      panic(tokenstream, "parseForList: expected final value");
     }
     currentNode->attachChild(child1);
     currentNode->attachChild(child2);
@@ -720,15 +772,18 @@ node *parser::parseWithStatement(lex::tokenStream &tokenstream) {
         currentNode = new node(nodeTypes::withStatement);
         childNode1 = parseVariable(tokenstream);
         if (childNode1 == nullptr) {
-            throw "parseWithStatement: expected variable";
+            // throw "parseWithStatement: expected variable";
+            panic(tokenstream, "parseWithStatement: expected variable");
         }
         currentNode->attachChild(childNode1);
         if (tokenstream.nextToken().type != lex::tokentypes::DO) {
-            throw "parseWithStatement: expected DO";
+            // throw "parseWithStatement: expected DO";
+            panic(tokenstream, "parseWithStatement: expected DO");
         }
         childNode2 = parseStatement(tokenstream);
         if (childNode2 == nullptr) {
-            throw "parseWithStatement: expted statement";
+            // throw "parseWithStatement: expted statement";
+            panic(tokenstream, "parseWithStatement: expected statement");
         }
         currentNode->attachChild(childNode2);
         return currentNode;
@@ -746,7 +801,7 @@ node *parser::parseCaseLabelList(lex::tokenStream &tokenstream) {
   currentNode->attachChild(child);
   while (tokenstream.nextToken().type == lex::tokentypes::COMMA){
     child = parseUnsignedInteger(tokenstream);
-    if (child == nullptr) throw "LabelList Expected Int";
+    if (child == nullptr) panic(tokenstream, "parseLabelListStatement: expected integer");;
     currentNode->attachChild(child);
   }
   tokenstream.rewind();
@@ -757,10 +812,10 @@ node *parser::parseCaseListElement(lex::tokenStream &tokenstream) {
   node *child;
   node *currentNode;
   child = parseCaseLabelList(tokenstream);
-  if(child == nullptr) throw "expected case list label";
+  if(child == nullptr) panic(tokenstream, "parseCaseStatement: expected case list label");;
   currentNode = new node(nodeTypes::caseListElement);
   currentNode->attachChild(child);
-  if (tokenstream.nextToken().type != lex::tokentypes::COLON) throw "ParseCaseListElement: expected :";
+  if (tokenstream.nextToken().type != lex::tokentypes::COLON) panic(tokenstream, "parseForStatement: expected :");;
   child = parseStatement(tokenstream);
   currentNode->attachChild(child);
   return currentNode;
@@ -775,10 +830,12 @@ node *parser::parseCaseStatement(lex::tokenStream &tokenstream) {
   }
   child = parseExpression(tokenstream);
   if (child == nullptr)
-    throw "parseCaseStatement: Expexted expression";
+    // throw "parseCaseStatement: Expected expression";
+    panic(tokenstream, "parseCaseStatement: expected expression");
   if (tokenstream.nextToken().type != lex::tokentypes::OF) {
     tokenstream.rewind();
-    throw "parseCaseStatement: Expected OF";
+    // throw "parseCaseStatement: Expected OF";
+    panic(tokenstream, "parseCaseStatement: expected OF");
   }
   currentNode = new node(nodeTypes::caseStatement);
   currentNode->attachChild(child);
@@ -802,7 +859,8 @@ node *parser::parseCaseStatement(lex::tokenStream &tokenstream) {
   tokenstream.rewind();
   if (tokenstream.nextToken().type != lex::tokentypes::END) {
     tokenstream.rewind();
-    throw "parseCaseStatement: Expexted end";
+    // throw "parseCaseStatement: Expexted end";
+    panic(tokenstream, "parseCaseStatement: expected end");
   }
   return currentNode;
 }
