@@ -185,7 +185,8 @@ static std::string tokentype[] =  {
 struct token {
   int type;
   std::string lexeme;
-  int ln = 0;
+  public:
+    int ln = 0;
 };
 
 class tokenizer {

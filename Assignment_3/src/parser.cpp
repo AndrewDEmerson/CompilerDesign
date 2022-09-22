@@ -10,10 +10,20 @@
 #include <ostream>
 #include <string>
 
+
 int GLOBALERROR = 0;
 
-int main() {
-  std::fstream codefile("test.pas");
+int main(int argc, char *argv[]) {
+  if (argc != 2){
+    std::cout << "Please Specify the path to the source file as an argument, EXITING" << std::endl;
+    return 0;
+  }
+  std::fstream codefile(argv[1]);
+  if (!codefile.is_open()) {
+    std::cerr << "Could not open file" << std::endl;
+    return -1;
+  }
+
   lex::tokenStream tokenstream(codefile);
   node *head;
   parser prse;
