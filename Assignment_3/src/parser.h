@@ -44,6 +44,8 @@ public:
   symbolTable symTab;
   bool short_print = true;
 
+  void panic(lex::tokenStream &tokenstream, const char *err);
+
 private:
   int numErrors = 0;
 };
