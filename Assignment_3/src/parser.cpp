@@ -20,6 +20,7 @@ int main() {
     head = prse.parseProgram(tokenstream);
     head->printTree();
     prse.symTab.printTable();
+    head->printFile();
   } catch (const char *error) {
     std::cerr << "Could not recover from error: " << error << "\nExiting"
               << std::endl;

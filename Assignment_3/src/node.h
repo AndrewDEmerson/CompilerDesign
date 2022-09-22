@@ -42,6 +42,7 @@ enum nodeTypes{
   caseListElement,
   caseStatement,
   withStatement,
+  add,
 };
 
 static std::string nodeNames[] = {
@@ -82,20 +83,26 @@ static std::string nodeNames[] = {
   "labelList",
   "caseListElement",
   "caseStatement",
-  "withStatement"
+  "withStatement",
+  "add"
 };
 
 class node{
   public:
     node(nodeTypes);
+    node(nodeTypes, int);
+    node(nodeTypes, std::string, int);
     node(nodeTypes, std::string);
+    node(nodeTypes, void*, int);
     node(nodeTypes, void*);
     nodeTypes type();
     void attachChild(node*);
     std::string id;
     void* value;
     void printTree(int level = 0);
+    void printFile(int level = 0);
   private:
     nodeTypes mytype;
     std::vector<node*> children;
+    int lnum;
 };
