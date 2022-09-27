@@ -19,11 +19,7 @@ public:
   /**
    * Visit parse trees produced by ExprParser.
    */
-    virtual std::any visitProgram(ExprParser::ProgramContext *context) = 0;
-
-    virtual std::any visitStatement(ExprParser::StatementContext *context) = 0;
-
-    virtual std::any visitExpr(ExprParser::ExprContext *context) = 0;
+    virtual std::any visitProg(ExprParser::ProgContext *context) = 0;
 
 
 };

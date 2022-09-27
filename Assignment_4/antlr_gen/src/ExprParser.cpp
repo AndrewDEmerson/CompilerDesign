@@ -43,30 +43,36 @@ void exprParserInitialize() {
   assert(exprParserStaticData == nullptr);
   auto staticData = std::make_unique<ExprParserStaticData>(
     std::vector<std::string>{
-      "program", "statement", "expr"
+      "prog"
     },
     std::vector<std::string>{
-      "", "'='", "'*'", "'/'", "'+'", "'-'", "'('", "')'"
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
+      "", "", "", "", "", "", "'+'", "'-'", "'*'", "'/'", "", "'='", "", 
+      "", "", "'<'", "'>'", "", "", "", "", "'^'", "','", "'('", "')'", 
+      "'['", "']'", "'{'", "'}'", "", "", "':'", "", "", "", "", "", "';'", 
+      "'.'", "'''"
     },
     std::vector<std::string>{
-      "", "", "", "", "", "", "", "", "IDENTIFER", "INTEGER", "NEWLINE", 
-      "WS"
+      "", "PROGRAM", "CONST", "TYPE", "ARRAY", "OF", "RECORD", "VAR", "BEGIN", 
+      "END", "DIV", "MOD", "AND", "OR", "NOT", "IF", "THEN", "ELSE", "CASE", 
+      "REPEAT", "UNTIL", "WHILE", "DO", "FOR", "TO", "DOWNTO", "WRITE", 
+      "WRITELN", "READ", "READLN", "PROCEDURE", "FUNCTION", "ASM", "BREAK", 
+      "CONSTRUCTOR", "CONTINUE", "DESTRCUTOR", "FALSE", "FILE", "GOTO", 
+      "IMPLEMENTATION", "INLINE", "INTERFACE", "LABEL", "NIL", "OBJECT", 
+      "ON", "OPERATOR", "PAKCED", "SET", "SHL", "SHR", "TRUE", "UNIT", "USES", 
+      "WITH", "XOR", "PLUSOP", "MINUSOP", "MULTOP", "DIVOP", "ASSIGN", "EQUAL", 
+      "NE", "LTEQ", "GTEQ", "LT", "GT", "PLUSEQUAL", "MINUSEQUAL", "MULTEQUAL", 
+      "DIVEQUAL", "CARAT", "COMMA", "LPAREN", "RPAREN", "LBRACKET", "RBRACKET", 
+      "LBRACE", "RBRACE", "LCOMMENT", "RCOMMENT", "COLON", "IDENTIFIER", 
+      "INTEGER", "REAL", "NEWLINE", "WS", "SEMICOLON", "PERIOD", "QUOTE", 
+      "CHARACTER", "STRING", "COMMENT"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,11,43,2,0,7,0,2,1,7,1,2,2,7,2,1,0,4,0,8,8,0,11,0,12,0,9,1,1,1,1,1,
-  	1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,21,8,1,1,2,1,2,1,2,1,2,1,2,1,2,1,2,3,2,
-  	30,8,2,1,2,1,2,1,2,1,2,1,2,1,2,5,2,38,8,2,10,2,12,2,41,9,2,1,2,0,1,4,
-  	3,0,2,4,0,2,1,0,2,3,1,0,4,5,46,0,7,1,0,0,0,2,20,1,0,0,0,4,29,1,0,0,0,
-  	6,8,3,2,1,0,7,6,1,0,0,0,8,9,1,0,0,0,9,7,1,0,0,0,9,10,1,0,0,0,10,1,1,0,
-  	0,0,11,12,3,4,2,0,12,13,5,10,0,0,13,21,1,0,0,0,14,15,5,8,0,0,15,16,5,
-  	1,0,0,16,17,3,4,2,0,17,18,5,10,0,0,18,21,1,0,0,0,19,21,5,10,0,0,20,11,
-  	1,0,0,0,20,14,1,0,0,0,20,19,1,0,0,0,21,3,1,0,0,0,22,23,6,2,-1,0,23,30,
-  	5,9,0,0,24,30,5,8,0,0,25,26,5,6,0,0,26,27,3,4,2,0,27,28,5,7,0,0,28,30,
-  	1,0,0,0,29,22,1,0,0,0,29,24,1,0,0,0,29,25,1,0,0,0,30,39,1,0,0,0,31,32,
-  	10,5,0,0,32,33,7,0,0,0,33,38,3,4,2,6,34,35,10,4,0,0,35,36,7,1,0,0,36,
-  	38,3,4,2,5,37,31,1,0,0,0,37,34,1,0,0,0,38,41,1,0,0,0,39,37,1,0,0,0,39,
-  	40,1,0,0,0,40,5,1,0,0,0,41,39,1,0,0,0,5,9,20,29,37,39
+  	4,1,93,5,2,0,7,0,1,0,1,0,1,0,0,0,1,0,0,0,3,0,2,1,0,0,0,2,3,5,1,0,0,3,
+  	1,1,0,0,0,0
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -115,37 +121,32 @@ antlr4::atn::SerializedATNView ExprParser::getSerializedATN() const {
 }
 
 
-//----------------- ProgramContext ------------------------------------------------------------------
+//----------------- ProgContext ------------------------------------------------------------------
 
-ExprParser::ProgramContext::ProgramContext(ParserRuleContext *parent, size_t invokingState)
+ExprParser::ProgContext::ProgContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<ExprParser::StatementContext *> ExprParser::ProgramContext::statement() {
-  return getRuleContexts<ExprParser::StatementContext>();
-}
-
-ExprParser::StatementContext* ExprParser::ProgramContext::statement(size_t i) {
-  return getRuleContext<ExprParser::StatementContext>(i);
+tree::TerminalNode* ExprParser::ProgContext::PROGRAM() {
+  return getToken(ExprParser::PROGRAM, 0);
 }
 
 
-size_t ExprParser::ProgramContext::getRuleIndex() const {
-  return ExprParser::RuleProgram;
+size_t ExprParser::ProgContext::getRuleIndex() const {
+  return ExprParser::RuleProg;
 }
 
 
-std::any ExprParser::ProgramContext::accept(tree::ParseTreeVisitor *visitor) {
+std::any ExprParser::ProgContext::accept(tree::ParseTreeVisitor *visitor) {
   if (auto parserVisitor = dynamic_cast<ExprVisitor*>(visitor))
-    return parserVisitor->visitProgram(this);
+    return parserVisitor->visitProg(this);
   else
     return visitor->visitChildren(this);
 }
 
-ExprParser::ProgramContext* ExprParser::program() {
-  ProgramContext *_localctx = _tracker.createInstance<ProgramContext>(_ctx, getState());
-  enterRule(_localctx, 0, ExprParser::RuleProgram);
-  size_t _la = 0;
+ExprParser::ProgContext* ExprParser::prog() {
+  ProgContext *_localctx = _tracker.createInstance<ProgContext>(_ctx, getState());
+  enterRule(_localctx, 0, ExprParser::RuleProg);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -156,17 +157,8 @@ ExprParser::ProgramContext* ExprParser::program() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(7); 
-    _errHandler->sync(this);
-    _la = _input->LA(1);
-    do {
-      setState(6);
-      statement();
-      setState(9); 
-      _errHandler->sync(this);
-      _la = _input->LA(1);
-    } while (((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 1856) != 0);
+    setState(2);
+    match(ExprParser::PROGRAM);
    
   }
   catch (RecognitionException &e) {
@@ -176,278 +168,6 @@ ExprParser::ProgramContext* ExprParser::program() {
   }
 
   return _localctx;
-}
-
-//----------------- StatementContext ------------------------------------------------------------------
-
-ExprParser::StatementContext::StatementContext(ParserRuleContext *parent, size_t invokingState)
-  : ParserRuleContext(parent, invokingState) {
-}
-
-ExprParser::ExprContext* ExprParser::StatementContext::expr() {
-  return getRuleContext<ExprParser::ExprContext>(0);
-}
-
-tree::TerminalNode* ExprParser::StatementContext::NEWLINE() {
-  return getToken(ExprParser::NEWLINE, 0);
-}
-
-tree::TerminalNode* ExprParser::StatementContext::IDENTIFER() {
-  return getToken(ExprParser::IDENTIFER, 0);
-}
-
-
-size_t ExprParser::StatementContext::getRuleIndex() const {
-  return ExprParser::RuleStatement;
-}
-
-
-std::any ExprParser::StatementContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<ExprVisitor*>(visitor))
-    return parserVisitor->visitStatement(this);
-  else
-    return visitor->visitChildren(this);
-}
-
-ExprParser::StatementContext* ExprParser::statement() {
-  StatementContext *_localctx = _tracker.createInstance<StatementContext>(_ctx, getState());
-  enterRule(_localctx, 2, ExprParser::RuleStatement);
-
-#if __cplusplus > 201703L
-  auto onExit = finally([=, this] {
-#else
-  auto onExit = finally([=] {
-#endif
-    exitRule();
-  });
-  try {
-    setState(20);
-    _errHandler->sync(this);
-    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 1, _ctx)) {
-    case 1: {
-      enterOuterAlt(_localctx, 1);
-      setState(11);
-      expr(0);
-      setState(12);
-      match(ExprParser::NEWLINE);
-      break;
-    }
-
-    case 2: {
-      enterOuterAlt(_localctx, 2);
-      setState(14);
-      match(ExprParser::IDENTIFER);
-      setState(15);
-      match(ExprParser::T__0);
-      setState(16);
-      expr(0);
-      setState(17);
-      match(ExprParser::NEWLINE);
-      break;
-    }
-
-    case 3: {
-      enterOuterAlt(_localctx, 3);
-      setState(19);
-      match(ExprParser::NEWLINE);
-      break;
-    }
-
-    default:
-      break;
-    }
-   
-  }
-  catch (RecognitionException &e) {
-    _errHandler->reportError(this, e);
-    _localctx->exception = std::current_exception();
-    _errHandler->recover(this, _localctx->exception);
-  }
-
-  return _localctx;
-}
-
-//----------------- ExprContext ------------------------------------------------------------------
-
-ExprParser::ExprContext::ExprContext(ParserRuleContext *parent, size_t invokingState)
-  : ParserRuleContext(parent, invokingState) {
-}
-
-tree::TerminalNode* ExprParser::ExprContext::INTEGER() {
-  return getToken(ExprParser::INTEGER, 0);
-}
-
-tree::TerminalNode* ExprParser::ExprContext::IDENTIFER() {
-  return getToken(ExprParser::IDENTIFER, 0);
-}
-
-std::vector<ExprParser::ExprContext *> ExprParser::ExprContext::expr() {
-  return getRuleContexts<ExprParser::ExprContext>();
-}
-
-ExprParser::ExprContext* ExprParser::ExprContext::expr(size_t i) {
-  return getRuleContext<ExprParser::ExprContext>(i);
-}
-
-
-size_t ExprParser::ExprContext::getRuleIndex() const {
-  return ExprParser::RuleExpr;
-}
-
-
-std::any ExprParser::ExprContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<ExprVisitor*>(visitor))
-    return parserVisitor->visitExpr(this);
-  else
-    return visitor->visitChildren(this);
-}
-
-
-ExprParser::ExprContext* ExprParser::expr() {
-   return expr(0);
-}
-
-ExprParser::ExprContext* ExprParser::expr(int precedence) {
-  ParserRuleContext *parentContext = _ctx;
-  size_t parentState = getState();
-  ExprParser::ExprContext *_localctx = _tracker.createInstance<ExprContext>(_ctx, parentState);
-  ExprParser::ExprContext *previousContext = _localctx;
-  (void)previousContext; // Silence compiler, in case the context is not used by generated code.
-  size_t startState = 4;
-  enterRecursionRule(_localctx, 4, ExprParser::RuleExpr, precedence);
-
-    size_t _la = 0;
-
-#if __cplusplus > 201703L
-  auto onExit = finally([=, this] {
-#else
-  auto onExit = finally([=] {
-#endif
-    unrollRecursionContexts(parentContext);
-  });
-  try {
-    size_t alt;
-    enterOuterAlt(_localctx, 1);
-    setState(29);
-    _errHandler->sync(this);
-    switch (_input->LA(1)) {
-      case ExprParser::INTEGER: {
-        setState(23);
-        match(ExprParser::INTEGER);
-        break;
-      }
-
-      case ExprParser::IDENTIFER: {
-        setState(24);
-        match(ExprParser::IDENTIFER);
-        break;
-      }
-
-      case ExprParser::T__5: {
-        setState(25);
-        match(ExprParser::T__5);
-        setState(26);
-        expr(0);
-        setState(27);
-        match(ExprParser::T__6);
-        break;
-      }
-
-    default:
-      throw NoViableAltException(this);
-    }
-    _ctx->stop = _input->LT(-1);
-    setState(39);
-    _errHandler->sync(this);
-    alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 4, _ctx);
-    while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
-      if (alt == 1) {
-        if (!_parseListeners.empty())
-          triggerExitRuleEvent();
-        previousContext = _localctx;
-        setState(37);
-        _errHandler->sync(this);
-        switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 3, _ctx)) {
-        case 1: {
-          _localctx = _tracker.createInstance<ExprContext>(parentContext, parentState);
-          pushNewRecursionContext(_localctx, startState, RuleExpr);
-          setState(31);
-
-          if (!(precpred(_ctx, 5))) throw FailedPredicateException(this, "precpred(_ctx, 5)");
-          setState(32);
-          _la = _input->LA(1);
-          if (!(_la == ExprParser::T__1
-
-          || _la == ExprParser::T__2)) {
-          _errHandler->recoverInline(this);
-          }
-          else {
-            _errHandler->reportMatch(this);
-            consume();
-          }
-          setState(33);
-          expr(6);
-          break;
-        }
-
-        case 2: {
-          _localctx = _tracker.createInstance<ExprContext>(parentContext, parentState);
-          pushNewRecursionContext(_localctx, startState, RuleExpr);
-          setState(34);
-
-          if (!(precpred(_ctx, 4))) throw FailedPredicateException(this, "precpred(_ctx, 4)");
-          setState(35);
-          _la = _input->LA(1);
-          if (!(_la == ExprParser::T__3
-
-          || _la == ExprParser::T__4)) {
-          _errHandler->recoverInline(this);
-          }
-          else {
-            _errHandler->reportMatch(this);
-            consume();
-          }
-          setState(36);
-          expr(5);
-          break;
-        }
-
-        default:
-          break;
-        } 
-      }
-      setState(41);
-      _errHandler->sync(this);
-      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 4, _ctx);
-    }
-  }
-  catch (RecognitionException &e) {
-    _errHandler->reportError(this, e);
-    _localctx->exception = std::current_exception();
-    _errHandler->recover(this, _localctx->exception);
-  }
-  return _localctx;
-}
-
-bool ExprParser::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
-  switch (ruleIndex) {
-    case 2: return exprSempred(antlrcpp::downCast<ExprContext *>(context), predicateIndex);
-
-  default:
-    break;
-  }
-  return true;
-}
-
-bool ExprParser::exprSempred(ExprContext *_localctx, size_t predicateIndex) {
-  switch (predicateIndex) {
-    case 0: return precpred(_ctx, 5);
-    case 1: return precpred(_ctx, 4);
-
-  default:
-    break;
-  }
-  return true;
 }
 
 void ExprParser::initialize() {

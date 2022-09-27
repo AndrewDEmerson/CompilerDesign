@@ -101,6 +101,12 @@ class node{
     void* value;
     void printTree(int level = 0);
     void printFile(int level = 0);
+    int retLn(){
+      return lnum;
+    }
+    void setLn(int a){
+      lnum = a;
+    }
   private:
     nodeTypes mytype;
     std::vector<node*> children;

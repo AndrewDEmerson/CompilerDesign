@@ -15,15 +15,7 @@
 class  ExprBaseVisitor : public ExprVisitor {
 public:
 
-  virtual std::any visitProgram(ExprParser::ProgramContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitStatement(ExprParser::StatementContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitExpr(ExprParser::ExprContext *ctx) override {
+  virtual std::any visitProg(ExprParser::ProgContext *ctx) override {
     return visitChildren(ctx);
   }
 
