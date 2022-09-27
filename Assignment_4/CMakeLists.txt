@@ -1,6 +1,6 @@
 project(myThing)
-cmake_minimum_required(VERSION 3.24)
-set(CMAKE_CXX_STANDARD 20)
+cmake_minimum_required(VERSION 3.10)
+set(CMAKE_CXX_STANDARD 17)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/antlr_lib)
@@ -30,4 +30,4 @@ add_executable(main
 
 add_library(antlr4_static STATIC ${libantlrcpp_SRC})
 target_link_libraries(main PRIVATE antlr4_static)
-set_property(TARGET main PROPERTY CXX_STANDARD 20)
+set_property(TARGET main PROPERTY CXX_STANDARD 17)
