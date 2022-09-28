@@ -91,16 +91,25 @@ std::vector<std::string> ExprParser::_ruleNames = {
 std::vector<std::string> ExprParser::_literalNames = {
   "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
   "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-  "", "';'", "'.'", "'''"
+  "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
+  "", "", "", "'+'", "'-'", "'*'", "'/'", "", "'='", "", "", "", "'<'", 
+  "'>'", "", "", "", "", "'^'", "','", "'('", "')'", "'['", "']'", "'{'", 
+  "'}'", "", "", "':'", "", "", "", "", "", "';'", "'.'", "'''"
 };
 
 std::vector<std::string> ExprParser::_symbolicNames = {
   "", "PROGRAM", "CONST", "TYPE", "ARRAY", "OF", "RECORD", "VAR", "BEGIN", 
   "END", "DIV", "MOD", "AND", "OR", "NOT", "IF", "THEN", "ELSE", "CASE", 
   "REPEAT", "UNTIL", "WHILE", "DO", "FOR", "TO", "DOWNTO", "WRITE", "WRITELN", 
-  "READ", "READLN", "PROCEDURE", "FUNCTION", "IDENTIFIER", "INTEGER", "REAL", 
-  "NEWLINE", "WS", "SEMICOLON", "PERIOD", "QUOTE", "CHARACTER", "STRING", 
-  "COMMENT"
+  "READ", "READLN", "PROCEDURE", "FUNCTION", "ASM", "BREAK", "CONSTRUCTOR", 
+  "CONTINUE", "DESTRCUTOR", "FALSE", "FILE", "GOTO", "IMPLEMENTATION", "INLINE", 
+  "INTERFACE", "LABEL", "NIL", "OBJECT", "ON", "OPERATOR", "PAKCED", "SET", 
+  "SHL", "SHR", "TRUE", "UNIT", "USES", "WITH", "XOR", "PLUSOP", "MINUSOP", 
+  "MULTOP", "DIVOP", "ASSIGN", "EQUAL", "NE", "LTEQ", "GTEQ", "LT", "GT", 
+  "PLUSEQUAL", "MINUSEQUAL", "MULTEQUAL", "DIVEQUAL", "CARAT", "COMMA", 
+  "LPAREN", "RPAREN", "LBRACKET", "RBRACKET", "LBRACE", "RBRACE", "LCOMMENT", 
+  "RCOMMENT", "COLON", "IDENTIFIER", "INTEGER", "REAL", "NEWLINE", "WS", 
+  "SEMICOLON", "PERIOD", "QUOTE", "CHARACTER", "STRING", "COMMENT"
 };
 
 dfa::Vocabulary ExprParser::_vocabulary(_literalNames, _symbolicNames);
@@ -123,7 +132,7 @@ ExprParser::Initializer::Initializer() {
 
   _serializedATN = {
     0x3, 0x608b, 0xa72a, 0x8133, 0xb9ed, 0x417c, 0x3be7, 0x7786, 0x5964, 
-    0x3, 0x2c, 0x7, 0x4, 0x2, 0x9, 0x2, 0x3, 0x2, 0x3, 0x2, 0x3, 0x2, 0x2, 
+    0x3, 0x5f, 0x7, 0x4, 0x2, 0x9, 0x2, 0x3, 0x2, 0x3, 0x2, 0x3, 0x2, 0x2, 
     0x2, 0x3, 0x2, 0x2, 0x2, 0x2, 0x5, 0x2, 0x4, 0x3, 0x2, 0x2, 0x2, 0x4, 
     0x5, 0x7, 0x3, 0x2, 0x2, 0x5, 0x3, 0x3, 0x2, 0x2, 0x2, 0x2, 
   };
