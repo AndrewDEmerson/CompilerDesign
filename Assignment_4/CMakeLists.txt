@@ -4,10 +4,10 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/antlr_lib)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/antlr_gen)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/antlr_gen/src)
 
 file(GLOB ANTLR_GEN_EXES
-     "${CMAKE_CURRENT_SOURCE_DIR}/antlr_gen/*.cpp"
+     "${CMAKE_CURRENT_SOURCE_DIR}/antlr_gen/src/*.cpp"
 )
 
 file(GLOB libantlrcpp_SRC

@@ -1,5 +1,5 @@
 
-// Generated from src/Expr.g4 by ANTLR 4.11.1
+// Generated from src/Expr.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -15,15 +15,7 @@
 class  ExprBaseVisitor : public ExprVisitor {
 public:
 
-  virtual std::any visitProgram(ExprParser::ProgramContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitStatement(ExprParser::StatementContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitExpr(ExprParser::ExprContext *ctx) override {
+  virtual antlrcpp::Any visitProg(ExprParser::ProgContext *ctx) override {
     return visitChildren(ctx);
   }
 

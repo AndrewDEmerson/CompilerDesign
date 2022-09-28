@@ -1,5 +1,5 @@
 
-// Generated from src/Expr.g4 by ANTLR 4.11.1
+// Generated from src/Expr.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -19,11 +19,7 @@ public:
   /**
    * Visit parse trees produced by ExprParser.
    */
-    virtual std::any visitProgram(ExprParser::ProgramContext *context) = 0;
-
-    virtual std::any visitStatement(ExprParser::StatementContext *context) = 0;
-
-    virtual std::any visitExpr(ExprParser::ExprContext *context) = 0;
+    virtual antlrcpp::Any visitProg(ExprParser::ProgContext *context) = 0;
 
 
 };

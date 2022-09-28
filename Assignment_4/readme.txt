@@ -1,5 +1,5 @@
 To generate files based on an antlr grammar file:
-  antlr4 -visitor -no-listener -Dlanguage=Cpp src/Expr.g4 -o antlr_gen
+  java -jar /usr/local/lib/antlr-4.7.2-complete.jar -visitor -no-listener -Dlanguage=Cpp src/Expr.g4 -o antlr_gen
 
 To build the program
   mkdir build

@@ -13,7 +13,10 @@
 using namespace antlr4;
 using namespace antlr4::tree;
 
-Token* TerminalNodeImpl::getSymbol() const {
+TerminalNodeImpl::TerminalNodeImpl(Token *symbol_) : symbol(symbol_) {
+}
+
+Token* TerminalNodeImpl::getSymbol() {
   return symbol;
 }
 
@@ -30,7 +33,7 @@ misc::Interval TerminalNodeImpl::getSourceInterval() {
   return misc::Interval(tokenIndex, tokenIndex);
 }
 
-std::any TerminalNodeImpl::accept(ParseTreeVisitor *visitor) {
+antlrcpp::Any TerminalNodeImpl::accept(ParseTreeVisitor *visitor) {
   return visitor->visitTerminal(this);
 }
 
@@ -38,7 +41,7 @@ std::string TerminalNodeImpl::getText() {
   return symbol->getText();
 }
 
-std::string TerminalNodeImpl::toStringTree(Parser * /*parser*/, bool /*pretty*/) {
+std::string TerminalNodeImpl::toStringTree(Parser * /*parser*/) {
   return toString();
 }
 
@@ -49,6 +52,6 @@ std::string TerminalNodeImpl::toString() {
   return symbol->getText();
 }
 
-std::string TerminalNodeImpl::toStringTree(bool /*pretty*/) {
+std::string TerminalNodeImpl::toStringTree() {
   return toString();
 }
