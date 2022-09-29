@@ -1,4 +1,4 @@
-project(myThing)
+project(PascalCompiler)
 cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -12,14 +12,8 @@ file(GLOB ANTLR_GEN_EXES
 
 file(GLOB libantlrcpp_SRC
   "${PROJECT_SOURCE_DIR}/antlr_lib/*.cpp"
-  "${PROJECT_SOURCE_DIR}/antlr_lib/atn/*.cpp"
-  "${PROJECT_SOURCE_DIR}/antlr_lib/dfa/*.cpp"
-  "${PROJECT_SOURCE_DIR}/antlr_lib/internal/*.cpp"
-  "${PROJECT_SOURCE_DIR}/antlr_lib/misc/*.cpp"
-  "${PROJECT_SOURCE_DIR}/antlr_lib/support/*.cpp"
-  "${PROJECT_SOURCE_DIR}/antlr_lib/tree/*.cpp"
-  "${PROJECT_SOURCE_DIR}/antlr_lib/tree/pattern/*.cpp"
-  "${PROJECT_SOURCE_DIR}/antlr_lib/tree/xpath/*.cpp"
+  "${PROJECT_SOURCE_DIR}/antlr_lib/*/*.cpp"
+  "${PROJECT_SOURCE_DIR}/antlr_lib/*/*/*.cpp"
 )
 
 #Put the cpp for the main exe here.
