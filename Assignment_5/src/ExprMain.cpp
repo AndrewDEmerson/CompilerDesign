@@ -78,14 +78,21 @@ std::string printTree(tree::ParseTree *t, Parser *recog) {
       //Prints var/identifier name if terminal node
       if (temp == "unsignedInteger" | temp == "simpleStatement" | temp == "identifier") {
         ss <<  " : " << antlrcpp::escapeWhitespace(tree::Trees::getNodeText(run->children[0], ruleNames), false) << "/>";
+        if (temp == "identifier"){
+          std::string varname = antlrcpp::escapeWhitespace(tree::Trees::getNodeText(run->children[0], ruleNames), false);
+          bool alreadyintable = false;
+          for (int i = 0; i < table.size(); i++){
+            if (table[i] == varname) {
+              alreadyintable = true;
+              break;
+            }
+          }
+          if (!alreadyintable) table.push_back(varname);
+        }
       }
       else ss << ">";
     } 
     else {
-      //Push variables and identifiers to the symbol table
-      // if (/*child parent == identifier or var*/) {
-      //   table.push_back(/*child.text*/);
-      // }
       while (++childIndex == run->children.size()) {
         if (stack.size() > 0) {
           // Reached the end of the current level. See if we can step up from here.
@@ -107,7 +114,7 @@ std::string printTree(tree::ParseTree *t, Parser *recog) {
   }
   ss << "\n\nSymbol Table:\n";
   for (int i = 0; i < table.size(); i++){
-    ss << "| " << table[i] << "\n"; 
+    ss << "\t" << table[i] << "\n"; 
   }
   return ss.str();
 }
