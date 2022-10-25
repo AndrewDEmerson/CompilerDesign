@@ -27,9 +27,6 @@ int main(int argc, const char *args[]) {
   ExprLexer lexer(&input);
   CommonTokenStream tokens(&lexer);
 
-  // Print the token stream.
-  std::cout << "Tokens:" << std::endl;
-
   tokens.fill();
   // for (Token *token : tokens.getTokens()) {
   //   std::cout << lexer.getVocabulary().getDisplayName(token->getType()) << " : "
@@ -53,6 +50,7 @@ int main(int argc, const char *args[]) {
 //TODO output as xml
 std::string printTree(tree::ParseTree *t, Parser *recog) {
   const std::vector<std::string> &ruleNames = recog->getRuleNames();
+  std::vector<std::string> table;
   std::string temp = antlrcpp::escapeWhitespace(tree::Trees::getNodeText(t, ruleNames), false);
   if (t->children.empty()) {
     return temp;
@@ -75,22 +73,41 @@ std::string printTree(tree::ParseTree *t, Parser *recog) {
       childIndex = 0;
       ss << '\n';
       for (int i = 0; i < stack.size(); i++)
-        ss << "   ";
-      ss << temp << ' ';
-    } else {
-      ss << temp;
+        ss << "  ";
+      ss << "<" << temp;
+      //Prints var/identifier name if terminal node
+      if (temp == "unsignedInteger" | temp == "simpleStatement" | temp == "identifier") {
+        ss <<  " : " << antlrcpp::escapeWhitespace(tree::Trees::getNodeText(run->children[0], ruleNames), false) << "/>";
+      }
+      else ss << ">";
+    } 
+    else {
+      //Push variables and identifiers to the symbol table
+      // if (/*child parent == identifier or var*/) {
+      //   table.push_back(/*child.text*/);
+      // }
       while (++childIndex == run->children.size()) {
         if (stack.size() > 0) {
           // Reached the end of the current level. See if we can step up from here.
           childIndex = stack.top();
           stack.pop();
           run = run->parent;
-        } else {
+          temp = antlrcpp::escapeWhitespace(tree::Trees::getNodeText(run, ruleNames),false);
+          ss << "\n"; 
+          for (int i = stack.size(); i>0; i--) {
+            ss << "  ";
+          }
+          ss << "<" << temp << "/>"; 
+        } 
+        else {
           break;
         }
       }
     }
   }
-
+  ss << "\n\nSymbol Table:\n";
+  for (int i = 0; i < table.size(); i++){
+    ss << "| " << table[i] << "\n"; 
+  }
   return ss.str();
 }
