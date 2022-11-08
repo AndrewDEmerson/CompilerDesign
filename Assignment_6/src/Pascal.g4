@@ -8,279 +8,300 @@ grammar Pascal;
     using namespace intermediate::type;
 }
 
-program           : programHeader block '.' ;
-programHeader     : PROGRAM programIdentifier programParameters? ';' ; 
-programParameters : '(' IDENTIFIER ( ',' IDENTIFIER )* ')' ;
+program: programHeader block '.';
+programHeader: PROGRAM programIdentifier programParameters? ';';
+programParameters: '(' IDENTIFIER ( ',' IDENTIFIER)* ')';
 
-programIdentifier   locals [ SymtabEntry *entry = nullptr ]
-    : IDENTIFIER ;
+programIdentifier
+	locals[ SymtabEntry *entry = nullptr ]: IDENTIFIER;
 
-block         : declarations compoundStatement ;
-declarations  : ( constantsPart ';' )? ( typesPart ';' )? 
-                ( variablesPart ';' )? ( routinesPart ';')? ;
+block: declarations compoundStatement;
+declarations: (constantsPart ';')? (typesPart ';')? (
+		variablesPart ';'
+	)? (routinesPart ';')?;
 
-constantsPart           : CONST constantDefinitionsList ;
-constantDefinitionsList : constantDefinition ( ';' constantDefinition )* ;
-constantDefinition      : constantIdentifier '=' constant ;
+constantsPart: CONST constantDefinitionsList;
+constantDefinitionsList:
+	constantDefinition (';' constantDefinition)*;
+constantDefinition: constantIdentifier '=' constant;
 
-constantIdentifier  locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
-    : IDENTIFIER ;
+constantIdentifier
+	locals[ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]:
+	IDENTIFIER;
 
-constant            locals [ Typespec *type = nullptr, Object value = nullptr ]  
-    : sign? ( IDENTIFIER | unsignedNumber )
-    | characterConstant
-    | stringConstant
-    ;
+constant
+	locals[ Typespec *type = nullptr, Object value = nullptr ]:
+	sign? (IDENTIFIER | unsignedNumber)
+	| characterConstant
+	| stringConstant;
 
-sign : '-' | '+' ;
+sign: '-' | '+';
 
-typesPart           : TYPE typeDefinitionsList ;
-typeDefinitionsList : typeDefinition ( ';' typeDefinition )* ;
-typeDefinition      : typeIdentifier '=' typeSpecification ;
+typesPart: TYPE typeDefinitionsList;
+typeDefinitionsList: typeDefinition ( ';' typeDefinition)*;
+typeDefinition: typeIdentifier '=' typeSpecification;
 
-typeIdentifier      locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
-    : IDENTIFIER ;
+typeIdentifier
+	locals[ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]:
+	IDENTIFIER;
 
-typeSpecification   locals [ Typespec *type = nullptr ]
-    : simpleType        # simpleTypespec
-    | arrayType         # arrayTypespec 
-    | recordType        # recordTypespec
-    ;
+typeSpecification
+	locals[ Typespec *type = nullptr ]:
+	simpleType		# simpleTypespec
+	| arrayType		# arrayTypespec
+	| recordType	# recordTypespec;
 
-simpleType          locals [ Typespec *type = nullptr ] 
-    : typeIdentifier    # typeIdentifierTypespec 
-    | enumerationType   # enumerationTypespec
-    | subrangeType      # subrangeTypespec
-    ;
-           
-enumerationType     : '(' enumerationConstant ( ',' enumerationConstant )* ')' ;
-enumerationConstant : constantIdentifier ;
-subrangeType        : constant '..' constant ;
+simpleType
+	locals[ Typespec *type = nullptr ]:
+	typeIdentifier		# typeIdentifierTypespec
+	| enumerationType	# enumerationTypespec
+	| subrangeType		# subrangeTypespec;
 
-arrayType
-    : ARRAY '[' arrayDimensionList ']' OF typeSpecification ;
-arrayDimensionList : simpleType ( ',' simpleType )* ;
+enumerationType:
+	'(' enumerationConstant (',' enumerationConstant)* ')';
+enumerationConstant: constantIdentifier;
+subrangeType: constant '..' constant;
 
-recordType          locals [ SymtabEntry *entry = nullptr ]   
-    : RECORD recordFields ';'? END ;
-recordFields : variableDeclarationsList ;
-           
-variablesPart            : VAR variableDeclarationsList ;
-variableDeclarationsList : variableDeclarations ( ';' variableDeclarations )* ;
-variableDeclarations     : variableIdentifierList ':' typeSpecification ;
-variableIdentifierList   : variableIdentifier ( ',' variableIdentifier )* ;
+arrayType:
+	ARRAY '[' arrayDimensionList ']' OF typeSpecification;
+arrayDimensionList: simpleType ( ',' simpleType)*;
 
-variableIdentifier  locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ] 
-    : IDENTIFIER ;
+recordType
+	locals[ SymtabEntry *entry = nullptr ]:
+	RECORD recordFields ';'? END;
+recordFields: variableDeclarationsList;
 
-routinesPart      : routineDefinition ( ';' routineDefinition)* ;
-routineDefinition : ( procedureHead | functionHead ) ';' block ;
-procedureHead     : PROCEDURE routineIdentifier parameters? ;
-functionHead      : FUNCTION  routineIdentifier parameters? ':' typeIdentifier ;
+variablesPart: VAR variableDeclarationsList;
+variableDeclarationsList:
+	variableDeclarations (';' variableDeclarations)*;
+variableDeclarations:
+	variableIdentifierList ':' typeSpecification;
+variableIdentifierList:
+	variableIdentifier (',' variableIdentifier)*;
 
-routineIdentifier   locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
-    : IDENTIFIER ;
+variableIdentifier
+	locals[ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]:
+	IDENTIFIER;
 
-parameters                : '(' parameterDeclarationsList ')' ;
-parameterDeclarationsList : parameterDeclarations ( ';' parameterDeclarations )* ;
-parameterDeclarations     : VAR? parameterIdentifierList ':' typeIdentifier ;
-parameterIdentifierList   : parameterIdentifier ( ',' parameterIdentifier )* ;
+routinesPart: routineDefinition ( ';' routineDefinition)*;
+routineDefinition: ( procedureHead | functionHead) ';' block;
+procedureHead: PROCEDURE routineIdentifier parameters?;
+functionHead:
+	FUNCTION routineIdentifier parameters? ':' typeIdentifier;
 
-parameterIdentifier   locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
-    : IDENTIFIER ;
+routineIdentifier
+	locals[ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]:
+	IDENTIFIER;
 
-statement : compoundStatement
-          | assignmentStatement
-          | ifStatement
-          | caseStatement
-          | repeatStatement
-          | whileStatement
-          | forStatement
-          | writeStatement
-          | writelnStatement
-          | readStatement
-          | readlnStatement
-          | procedureCallStatement
-          | emptyStatement
-          ;
+parameters: '(' parameterDeclarationsList ')';
+parameterDeclarationsList:
+	parameterDeclarations (';' parameterDeclarations)*;
+parameterDeclarations:
+	VAR? parameterIdentifierList ':' typeIdentifier;
+parameterIdentifierList:
+	parameterIdentifier (',' parameterIdentifier)*;
 
-compoundStatement : BEGIN statementList END ;
-emptyStatement : ;
-     
-statementList       : statement ( ';' statement )* ;
-assignmentStatement : lhs ':=' rhs ;
+parameterIdentifier
+	locals[ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]:
+	IDENTIFIER;
 
-lhs                 locals [ Typespec *type = nullptr ] 
-    : variable ;
-rhs : expression ;
+statement:
+	compoundStatement
+	| assignmentStatement
+	| ifStatement
+	| caseStatement
+	| repeatStatement
+	| whileStatement
+	| forStatement
+	| writeStatement
+	| writelnStatement
+	| readStatement
+	| readlnStatement
+	| procedureCallStatement
+	| emptyStatement;
 
-ifStatement    : IF expression THEN trueStatement ( ELSE falseStatement )? ;
-trueStatement  : statement ;
-falseStatement : statement ;
+compoundStatement: BEGIN statementList END;
+emptyStatement:;
+
+statementList: statement ( ';' statement)*;
+assignmentStatement: lhs ':=' rhs;
+
+lhs
+	locals[ Typespec *type = nullptr ]: variable;
+rhs: expression;
+
+ifStatement:
+	IF expression THEN trueStatement (ELSE falseStatement)?;
+trueStatement: statement;
+falseStatement: statement;
 
 caseStatement
-        locals [ map<int, PascalParser::StatementContext*> *jumpTable = nullptr ]
-    : CASE expression OF caseBranchList END ;
-    
-caseBranchList   : caseBranch ( ';' caseBranch )* ;
-caseBranch       : caseConstantList ':' statement | ;
-caseConstantList : caseConstant ( ',' caseConstant )* ;
+	locals[ map<int, PascalParser::StatementContext*> *jumpTable = nullptr ]:
+	CASE expression OF caseBranchList END;
 
-caseConstant        locals [ Typespec *type = nullptr, int value = 0 ]
-    : constant ;
+caseBranchList: caseBranch ( ';' caseBranch)*;
+caseBranch: caseConstantList ':' statement |;
+caseConstantList: caseConstant ( ',' caseConstant)*;
 
-repeatStatement : REPEAT statementList UNTIL expression ;
-whileStatement  : WHILE expression DO statement ;
+caseConstant
+	locals[ Typespec *type = nullptr, int value = 0 ]: constant;
 
-forStatement : FOR variable ':=' expression 
-                    ( TO | DOWNTO ) expression DO statement ;
+repeatStatement: REPEAT statementList UNTIL expression;
+whileStatement: WHILE expression DO statement;
 
-procedureCallStatement : procedureName '(' argumentList? ')' ;
+forStatement:
+	FOR variable ':=' expression (TO | DOWNTO) expression DO statement;
 
-procedureName   locals [ SymtabEntry *entry = nullptr ] 
-    : IDENTIFIER ;
+procedureCallStatement: procedureName '(' argumentList? ')';
 
-argumentList : argument ( ',' argument )* ;
-argument     : expression ;
+procedureName
+	locals[ SymtabEntry *entry = nullptr ]: IDENTIFIER;
 
-writeStatement   : WRITE writeArguments ;
-writelnStatement : WRITELN writeArguments? ;
-writeArguments   : '(' writeArgument (',' writeArgument)* ')' ;
-writeArgument    : expression (':' fieldWidth)? ;
-fieldWidth       : sign? integerConstant (':' decimalPlaces)? ;
-decimalPlaces    : integerConstant ;
+argumentList: argument ( ',' argument)*;
+argument: expression;
 
-readStatement   : READ readArguments ;
-readlnStatement : READLN readArguments ;
-readArguments   : '(' variable ( ',' variable )* ')' ;
+writeStatement: WRITE writeArguments;
+writelnStatement: WRITELN writeArguments?;
+writeArguments: '(' writeArgument (',' writeArgument)* ')';
+writeArgument: expression (':' fieldWidth)?;
+fieldWidth: sign? integerConstant (':' decimalPlaces)?;
+decimalPlaces: integerConstant;
 
-expression          locals [ Typespec *type = nullptr ] 
-    : simpleExpression (relOp simpleExpression)? ;
-    
-simpleExpression    locals [ Typespec *type = nullptr ] 
-    : sign? term (addOp term)* ;
-    
-term                locals [ Typespec *type = nullptr ]
-    : factor (mulOp factor)* ;
+readStatement: READ readArguments;
+readlnStatement: READLN readArguments;
+readArguments: '(' variable ( ',' variable)* ')';
 
-factor              locals [ Typespec *type = nullptr ] 
-    : variable             # variableFactor
-    | number               # numberFactor
-    | characterConstant    # characterFactor
-    | stringConstant       # stringFactor
-    | functionCall         # functionCallFactor
-    | NOT factor           # notFactor
-    | '(' expression ')'   # parenthesizedFactor
-    ;
+expression
+	locals[ Typespec *type = nullptr ]:
+	simpleExpression (relOp simpleExpression)?;
 
-variable        locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ] 
-    : variableIdentifier modifier* ;
+simpleExpression
+	locals[ Typespec *type = nullptr ]:
+	sign? term (addOp term)*;
 
-modifier  : '[' indexList ']' | '.' field ;
-indexList : index ( ',' index )* ;
-index     : expression ; 
+term
+	locals[ Typespec *type = nullptr ]: factor (mulOp factor)*;
 
-field           locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]     
-    : IDENTIFIER ;
+factor
+	locals[ Typespec *type = nullptr ]:
+	variable				# variableFactor
+	| number				# numberFactor
+	| characterConstant		# characterFactor
+	| stringConstant		# stringFactor
+	| functionCall			# functionCallFactor
+	| NOT factor			# notFactor
+	| '(' expression ')'	# parenthesizedFactor;
 
-functionCall : functionName '(' argumentList? ')' ;
-functionName    locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ] 
-    : IDENTIFIER ;
-     
-number          : sign? unsignedNumber ;
-unsignedNumber  : integerConstant | realConstant ;
-integerConstant : INTEGER ;
-realConstant    : REAL;
+variable
+	locals[ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]:
+	variableIdentifier modifier*;
 
-characterConstant : CHARACTER ;
-stringConstant    : STRING ;
-       
-relOp : '=' | '<>' | '<' | '<=' | '>' | '>=' ;
-addOp : '+' | '-' | OR ;
-mulOp : '*' | '/' | DIV | MOD | AND ;
+modifier: '[' indexList ']' | '.' field;
+indexList: index ( ',' index)*;
+index: expression;
 
-fragment A : ('a' | 'A') ;
-fragment B : ('b' | 'B') ;
-fragment C : ('c' | 'C') ;
-fragment D : ('d' | 'D') ;
-fragment E : ('e' | 'E') ;
-fragment F : ('f' | 'F') ;
-fragment G : ('g' | 'G') ;
-fragment H : ('h' | 'H') ;
-fragment I : ('i' | 'I') ;
-fragment J : ('j' | 'J') ;
-fragment K : ('k' | 'K') ;
-fragment L : ('l' | 'L') ;
-fragment M : ('m' | 'M') ;
-fragment N : ('n' | 'N') ;
-fragment O : ('o' | 'O') ;
-fragment P : ('p' | 'P') ;
-fragment Q : ('q' | 'Q') ;
-fragment R : ('r' | 'R') ;
-fragment S : ('s' | 'S') ;
-fragment T : ('t' | 'T') ;
-fragment U : ('u' | 'U') ;
-fragment V : ('v' | 'V') ;
-fragment W : ('w' | 'W') ;
-fragment X : ('x' | 'X') ;
-fragment Y : ('y' | 'Y') ;
-fragment Z : ('z' | 'Z') ;
+field
+	locals[ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]:
+	IDENTIFIER;
 
-PROGRAM   : P R O G R A M ;
-CONST     : C O N S T ;
-TYPE      : T Y P E ;
-ARRAY     : A R R A Y ;
-OF        : O F ;
-RECORD    : R E C O R D ;
-VAR       : V A R ;
-BEGIN     : B E G I N ;
-END       : E N D ;
-DIV       : D I V ;
-MOD       : M O D ;
-AND       : A N D ;
-OR        : O R ;
-NOT       : N O T ;
-IF        : I F ;
-THEN      : T H E N ;
-ELSE      : E L S E ;
-CASE      : C A S E ;
-REPEAT    : R E P E A T ;
-UNTIL     : U N T I L ;
-WHILE     : W H I L E ;
-DO        : D O ;
-FOR       : F O R ;
-TO        : T O ;
-DOWNTO    : D O W N T O ;
-WRITE     : W R I T E ;
-WRITELN   : W R I T E L N ;
-READ      : R E A D ;
-READLN    : R E A D L N ;
-PROCEDURE : P R O C E D U R E ;
-FUNCTION  : F U N C T I O N ;
+functionCall: functionName '(' argumentList? ')';
+functionName
+	locals[ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]:
+	IDENTIFIER;
 
-IDENTIFIER : [a-zA-Z][a-zA-Z0-9]* ;
-INTEGER    : [0-9]+ ;
+number: sign? unsignedNumber;
+unsignedNumber: integerConstant | realConstant;
+integerConstant: INTEGER;
+realConstant: REAL;
 
-REAL       : INTEGER '.' INTEGER
-           | INTEGER ('e' | 'E') ('+' | '-')? INTEGER
-           | INTEGER '.' INTEGER ('e' | 'E') ('+' | '-')? INTEGER
-           ;
+characterConstant: CHARACTER;
+stringConstant: STRING;
 
-NEWLINE : '\r'? '\n' -> skip  ;
-WS      : [ \t]+ -> skip ; 
+relOp: '=' | '<>' | '<' | '<=' | '>' | '>=';
+addOp: '+' | '-' | OR;
+mulOp: '*' | '/' | DIV | MOD | AND;
 
-QUOTE     : '\'' ;
-CHARACTER : QUOTE CHARACTER_CHAR QUOTE ;
-STRING    : QUOTE STRING_CHAR* QUOTE ;
+fragment A: ('a' | 'A');
+fragment B: ('b' | 'B');
+fragment C: ('c' | 'C');
+fragment D: ('d' | 'D');
+fragment E: ('e' | 'E');
+fragment F: ('f' | 'F');
+fragment G: ('g' | 'G');
+fragment H: ('h' | 'H');
+fragment I: ('i' | 'I');
+fragment J: ('j' | 'J');
+fragment K: ('k' | 'K');
+fragment L: ('l' | 'L');
+fragment M: ('m' | 'M');
+fragment N: ('n' | 'N');
+fragment O: ('o' | 'O');
+fragment P: ('p' | 'P');
+fragment Q: ('q' | 'Q');
+fragment R: ('r' | 'R');
+fragment S: ('s' | 'S');
+fragment T: ('t' | 'T');
+fragment U: ('u' | 'U');
+fragment V: ('v' | 'V');
+fragment W: ('w' | 'W');
+fragment X: ('x' | 'X');
+fragment Y: ('y' | 'Y');
+fragment Z: ('z' | 'Z');
 
-fragment CHARACTER_CHAR : ~('\'')   // any non-quote character
-                        ;
+PROGRAM: P R O G R A M;
+CONST: C O N S T;
+TYPE: T Y P E;
+ARRAY: A R R A Y;
+OF: O F;
+RECORD: R E C O R D;
+VAR: V A R;
+BEGIN: B E G I N;
+END: E N D;
+DIV: D I V;
+MOD: M O D;
+AND: A N D;
+OR: O R;
+NOT: N O T;
+IF: I F;
+THEN: T H E N;
+ELSE: E L S E;
+CASE: C A S E;
+REPEAT: R E P E A T;
+UNTIL: U N T I L;
+WHILE: W H I L E;
+DO: D O;
+FOR: F O R;
+TO: T O;
+DOWNTO: D O W N T O;
+WRITE: W R I T E;
+WRITELN: W R I T E L N;
+READ: R E A D;
+READLN: R E A D L N;
+PROCEDURE: P R O C E D U R E;
+FUNCTION: F U N C T I O N;
 
-fragment STRING_CHAR : QUOTE QUOTE  // two consecutive quotes
-                     | ~('\'')      // any non-quote character
-                     ;
+IDENTIFIER: [a-zA-Z][a-zA-Z0-9]*;
+INTEGER: [0-9]+;
 
-COMMENT : '{' COMMENT_CHARACTER* '}' -> skip ;
+REAL:
+	INTEGER '.' INTEGER
+	| INTEGER ('e' | 'E') ('+' | '-')? INTEGER
+	| INTEGER '.' INTEGER ('e' | 'E') ('+' | '-')? INTEGER;
 
-fragment COMMENT_CHARACTER : ~('}') ;
-                     
+NEWLINE: '\r'? '\n' -> skip;
+WS: [ \t]+ -> skip;
+
+QUOTE: '\'';
+CHARACTER: QUOTE CHARACTER_CHAR QUOTE;
+STRING: QUOTE STRING_CHAR* QUOTE;
+
+fragment CHARACTER_CHAR:
+	~('\'') ; // any non-quote character
+
+fragment STRING_CHAR:
+	QUOTE QUOTE // two consecutive quotes
+	| ~('\'') ; // any non-quote character
+
+COMMENT: '{' COMMENT_CHARACTER* '}' -> skip;
+
+fragment COMMENT_CHARACTER: ~('}');

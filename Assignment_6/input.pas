@@ -1,16 +1,19 @@
-Program HelloWorld;
-var 
-  x, y, i: integer;
-  SuperVariableName:real := 2.0;
+program function1;
+var
+   a, b, calSum : integer;
+   
+function sum(a, b: integer): integer;
+var
+   tempSum: integer;
+
 begin
-  x:=0;
-  Y:=5;
-  SuperVariableName:=-1;
-  repeat
-    x:=1;
-    y:=2;
-  until
-    y = 2;
-  for i := 0 to 10 do
-    x:= x*10;
+   tempSum := a + b;
+   sum := tempSum;
+end;
+
+begin
+   a := 5;
+   b := 10;
+   calSum := sum(a, b);
+   writeln(a, ' + ', b, ' = ', calSum);
 end.

@@ -1,31 +1,27 @@
 EXECUTABLE_NAME = main
-MAIN_FILE = src/ExprMain.cpp
+SRC=src
+GENERATED=$(SRC)/generated
 
-OUTPUT=output
-GENERATED=generated
+CC=g++
+CCARGS= -c -I /usr/local/include/antlr4-runtime/ -I $(GENERATED)/src/ -I src/intermediate/.. -I src/..
+LDARGS= -g
+LIBS= /usr/local/lib/libantlr4-runtime.a
+
+OUTPUT=objectFiles
 
 antlrgencpp = $(wildcard $(GENERATED)/src/*.cpp)
 antlrgenobj = $(addprefix $(OUTPUT)/,$(notdir $(antlrgencpp:.cpp=.o)))
 
-intermediateCpp = $(wildcard intermediate/*/*.cpp)
-intermediateObjects = $(addprefix $(OUTPUT)/intermediate/,$(notdir $(intermediateCpp:.cpp=.o)))
+intermediateCpp = $(wildcard src/intermediate/*/*.cpp)
+intermediateObjects = $(addprefix $(OUTPUT)/,$(notdir $(intermediateCpp:.cpp=.o)))
 
-frontendCpp = $(wildcard frontend/*.cpp)
-frontendObjects = $(addprefix $(OUTPUT)/frontend/,$(notdir $(frontendCpp:.cpp=.o)))
+srcCpp = $(wildcard src/*.cpp)
+srcObjects = $(addprefix $(OUTPUT)/,$(notdir $(srcCpp:.cpp=.o)))
 
-# here is where you plug in the runtime for your OS
-CC=g++
-CCARGS= -c -I /usr/local/include/antlr4-runtime/ -I $(GENERATED)/src/ -I intermediate/.. -I frontend/..
-LDARGS= -g
-LIBS= /usr/local/lib/libantlr4-runtime.a
-SRC=src
+.PHONY: build antlr4 clean purge
 
-.PHONY: build antlr4 clean purge fresh
-
-build: $(MAIN_FILE) $(antlrgenobj) $(intermediateObjects) $(frontendObjects)
-	mkdir -p $(OUTPUT)/intermediate
-	$(CC) $(CCARGS) $(MAIN_FILE) -o $(addprefix $(OUTPUT)/,$(notdir $(MAIN_FILE:.cpp=.o)))
-	$(CC) $(LDARGS) $(addprefix $(OUTPUT)/,$(notdir $(MAIN_FILE:.cpp=.o))) $(antlrgenobj) $(intermediateObjects) $(frontendObjects) $(LIBS) -o $(EXECUTABLE_NAME)
+build: $(antlrgenobj) $(intermediateObjects) $(srcObjects)
+	$(CC) $(LDARGS) $(antlrgenobj) $(intermediateObjects) $(srcObjects) $(LIBS) -o $(EXECUTABLE_NAME)
 
 antlr4: $(SRC)/Pascal.g4
 	mkdir -p $(GENERATED) 
@@ -43,10 +39,10 @@ $(OUTPUT)/%.o: $(GENERATED)/src/%.cpp
 	mkdir -p $(OUTPUT) 
 	$(CC) $(CCARGS)  $< -o $@
 
-$(OUTPUT)/intermediate/%.o: intermediate/*/%.cpp
-	mkdir -p $(OUTPUT)/intermediate
+$(OUTPUT)/%.o: src/intermediate/*/%.cpp
+	mkdir -p $(OUTPUT)
 	$(CC) $(CCARGS)  $< -o $@
 
-$(OUTPUT)/frontend/%.o: frontend/%.cpp
-	mkdir -p $(OUTPUT)/frontend
+$(OUTPUT)/%.o: src/%.cpp
+	mkdir -p $(OUTPUT)
 	$(CC) $(CCARGS)  $< -o $@
