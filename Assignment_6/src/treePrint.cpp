@@ -34,12 +34,11 @@ std::string printTree(antlr4::tree::ParseTree *t, antlr4::Parser *recog) {
         ss << "  ";
       ss << "<" << temp;
       // Prints var/identifier name if terminal node
-      if (temp == "unsignedInteger" | temp == "simpleStatement" |
-          temp == "identifier") {
+      if (temp == "integerConstant" | temp == "variableIdentifier" | temp == "parameterIdentifier" | temp == "typeIdentifier" | temp == "stringConstant") {
         ss << " : "
            << antlrcpp::escapeWhitespace(
                   antlr4::tree::Trees::getNodeText(run->children[0], ruleNames), false)
-           << "/>";
+           << " />";
         if (temp == "identifier") {
           std::string varname = antlrcpp::escapeWhitespace(
               antlr4::tree::Trees::getNodeText(run->children[0], ruleNames), false);
