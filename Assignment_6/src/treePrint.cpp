@@ -5,12 +5,9 @@
 // Based on tree->toStringTree(&parser)
 std::string printTree(antlr4::tree::ParseTree *t, antlr4::Parser *recog) {
   const std::vector<std::string> &ruleNames = recog->getRuleNames();
-  std::vector<std::string> table;
-  std::string temp =
-      antlrcpp::escapeWhitespace(antlr4::tree::Trees::getNodeText(t, ruleNames), false);
-  if (t->children.empty()) {
+  std::string temp = antlrcpp::escapeWhitespace(antlr4::tree::Trees::getNodeText(t, ruleNames), false);
+  if (t->children.empty()) 
     return temp;
-  }
 
   std::stringstream ss;
   ss << temp;
@@ -34,51 +31,30 @@ std::string printTree(antlr4::tree::ParseTree *t, antlr4::Parser *recog) {
         ss << "  ";
       ss << "<" << temp;
       // Prints var/identifier name if terminal node
-      if (temp == "integerConstant" | temp == "variableIdentifier" | temp == "parameterIdentifier" | temp == "typeIdentifier" | temp == "stringConstant") {
+      if (temp == "integerConstant" | temp == "variableIdentifier" | 
+        temp == "parameterIdentifier" | temp == "typeIdentifier" | temp == "stringConstant") {
         ss << " : "
            << antlrcpp::escapeWhitespace(
                   antlr4::tree::Trees::getNodeText(run->children[0], ruleNames), false)
            << " />";
-        if (temp == "identifier") {
-          std::string varname = antlrcpp::escapeWhitespace(
-              antlr4::tree::Trees::getNodeText(run->children[0], ruleNames), false);
-          bool alreadyintable = false;
-          for (int i = 0; i < table.size(); i++) {
-            if (table[i] == varname) {
-              alreadyintable = true;
-              break;
-            }
-          }
-          if (!alreadyintable)
-            table.push_back(varname);
-        }
-      } else
-        ss << ">";
+      } else ss << ">";
     } else {
       while (++childIndex == run->children.size()) {
         if (stack.size() > 0) {
-          // Reached the end of the current level. See if we can step up from
-          // here.
+          // Reached the end of the current level. See if we can step up from here.
           childIndex = stack.top();
           stack.pop();
           run = run->parent;
-          temp = antlrcpp::escapeWhitespace(
-              antlr4::tree::Trees::getNodeText(run, ruleNames), false);
+          temp = antlrcpp::escapeWhitespace(antlr4::tree::Trees::getNodeText(run, ruleNames), false);
           ss << "\n";
           for (int i = stack.size(); i > 0; i--) {
             ss << "  ";
           }
           ss << "<" << temp << "/>";
-        } else {
-          break;
-        }
+        } 
+        else break;
       }
     }
-  }
-  ss << "\n\nSymbol Table:\n";
-  // Assume all vars are ints
-  for (int i = 0; i < table.size(); i++) {
-    ss << "\t" << table[i] << ":\tint\n";
   }
   return ss.str();
 }
