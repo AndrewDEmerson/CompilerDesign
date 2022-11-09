@@ -1,4 +1,9 @@
 program function1;
+const
+   concon = 3.141592654;
+type
+   vector = array [ 1..25] of array [1..10] of real;
+   aaa = real;
 var
    a, b, calSum : integer;
    

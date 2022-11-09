@@ -50,6 +50,7 @@ public:
   Object visitStringFactor(PascalParser::StringFactorContext *context);
   Object visitNotFactor(PascalParser::NotFactorContext *context);
   Object visitParenthesizedFactor(PascalParser::ParenthesizedFactorContext *context);
+  Object visitSubrangeTypespec(PascalParser::SubrangeTypespecContext *context);
 
 private:
   SymtabStack *symtabStack;

@@ -12,10 +12,67 @@
 #include "intermediate/util/CrossReferencer.h"
 
 int intermediate::symtab::Symtab::unnamedIndex = 0;
-
 void tableBuilder::printSymTableStack(){
   intermediate::util::CrossReferencer crossReferencer;
   crossReferencer.print(symtabStack);
+}
+
+Object tableBuilder::visitSubrangeTypespec(
+                                    PascalParser::SubrangeTypespecContext *ctx)
+{
+    Typespec *type = new Typespec(SUBRANGE);
+    PascalParser::SubrangeTypeContext *subCtx = ctx->subrangeType();
+    PascalParser::ConstantContext *minCtx = subCtx->constant()[0];
+    PascalParser::ConstantContext *maxCtx = subCtx->constant()[1];
+
+    Object minObj = visit(minCtx);
+    Object maxObj = visit(maxCtx);
+
+    Typespec *minType = minCtx->type;
+    Typespec *maxType = maxCtx->type;
+
+    if (   (   (minType->getForm() != SCALAR)
+    		&& (minType->getForm() != ENUMERATION))
+        || (minType == Predefined::realType)
+        || (minType == Predefined::stringType))
+    {
+        
+        minType = Predefined::integerType;
+        minObj  = 0;
+    }
+
+    int minValue;
+    int maxValue;
+
+    if (minType == Predefined::integerType)
+    {
+    	minValue = minObj.as<int>();
+    	maxValue = maxObj.as<int>();
+    }
+    else if (minType == Predefined::charType)
+    {
+    	minValue = minObj.as<char>();
+    	maxValue = maxObj.as<char>();
+    }
+    else  // enumeration constants
+    {
+    	minValue = minCtx->value.as<int>();
+    	maxValue = maxCtx->value.as<int>();
+    }
+
+    if ((maxType != minType) || (minValue > maxValue))
+    {
+        
+        maxType = minType;
+        maxObj  = minObj;
+    }
+
+    type->setSubrangeBaseType(minType);
+    type->setSubrangeMinValue(minValue);
+    type->setSubrangeMaxValue(maxValue);
+
+    ctx->type = type;
+    return nullptr;
 }
 
 Object tableBuilder::visitProgram(PascalParser::ProgramContext *context) {
