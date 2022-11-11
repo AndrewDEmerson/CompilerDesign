@@ -69,6 +69,9 @@ int main(int argc, const char *argv[]) {
   pass->visit(tree);
   if (print_tables) {
     pass->printSymTableStack();
+    output.close();
+    freopen("output.txt", "a", stdout);
+    pass->printSymTableStack();
   }
 
   output.close();
