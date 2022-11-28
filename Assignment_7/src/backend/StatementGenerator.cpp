@@ -1,0 +1,252 @@
+#include <string>
+#include <vector>
+#include <map>
+
+#include "PascalBaseVisitor.h"
+#include "antlr4-runtime.h"
+
+#include "intermediate/symtab/Predefined.h"
+#include "Compiler.h"
+#include "StatementGenerator.h"
+
+namespace backend { namespace compiler {
+
+using namespace std;
+using namespace intermediate;
+
+string StatementGenerator::typeToString(Typespec *type){
+    static std::map<Typespec*,string> typeMap= {
+            {Predefined::integerType,"I"},
+            {Predefined::charType,"C"},
+            {Predefined::booleanType,"Z"},
+            {Predefined::realType,"F"},
+            {Predefined::stringType,"S"},
+            {Predefined::undefinedType,"V"}
+    };
+    return typeMap[type];
+}
+
+void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext *ctx)
+{
+    PascalParser::VariableContext *varCtx  = ctx->lhs()->variable();
+    PascalParser::ExpressionContext *exprCtx = ctx->rhs()->expression();
+    SymtabEntry *varId = varCtx->entry;
+    Typespec *varType  = varCtx->type;
+    Typespec *exprType = exprCtx->type;
+
+    // The last modifier, if any, is the variable's last subscript or field.
+    int modifierCount = varCtx->modifier().size();
+    PascalParser::ModifierContext *lastModCtx = modifierCount == 0
+                            ? nullptr : varCtx->modifier()[modifierCount - 1];
+
+    // The target variable has subscripts and/or fields.
+    if (modifierCount > 0)
+    {
+        lastModCtx = varCtx->modifier()[modifierCount - 1];
+        compiler->visit(varCtx);
+    }
+
+    // Emit code to evaluate the expression.
+    compiler->visit(exprCtx);
+
+    // float variable := integer constant
+    if (   (varType == Predefined::realType)
+        && (exprType->baseType() == Predefined::integerType)) emit(I2F);
+
+    // Emit code to store the expression value into the target variable.
+    // The target variable has no subscripts or fields.
+    if (lastModCtx == nullptr) emitStoreValue(varId, varId->getType());
+
+    // The target variable is a field.
+    else if (lastModCtx->field() != nullptr)
+    {
+        emitStoreValue(lastModCtx->field()->entry, lastModCtx->field()->type);
+    }
+
+    // The target variable is an array element.
+    else
+    {
+        emitStoreValue(nullptr, varType);
+    }
+}
+
+void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
+{
+    /***** Complete this member function. *****/
+}
+
+void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
+{
+    /***** Complete this member function. *****/
+}
+
+void StatementGenerator::emitRepeat(PascalParser::RepeatStatementContext *ctx)
+{
+    Label *loopTopLabel  = new Label();
+    Label *loopExitLabel = new Label();
+
+    emitLabel(loopTopLabel);
+
+    compiler->visit(ctx->statementList());
+    compiler->visit(ctx->expression());
+    emit(IFNE, loopExitLabel);
+    emit(GOTO, loopTopLabel);
+
+    emitLabel(loopExitLabel);
+}
+
+void StatementGenerator::emitWhile(PascalParser::WhileStatementContext *ctx)
+{
+    /***** Complete this member function. *****/
+}
+
+void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)
+{
+    /***** Complete this member function. *****/
+}
+
+void StatementGenerator::emitProcedureCall(PascalParser::ProcedureCallStatementContext *ctx)
+{
+    /***** Complete this member function. *****/
+}
+
+void StatementGenerator::emitFunctionCall(PascalParser::FunctionCallContext *ctx)
+{
+    emitComment("emittingFunctionCall");
+    emitCall(ctx->functionName()->entry,ctx->argumentList());
+    /***** Complete this member function. *****/
+}
+
+void StatementGenerator::emitCall(SymtabEntry *routineId,
+                                  PascalParser::ArgumentListContext *argListCtx)
+{
+    /***** Complete this member function. *****/
+    string argType;
+
+    if (argListCtx) {
+        std::vector<Typespec *> expectedArgType;
+        expectedArgType.reserve(argListCtx->argument().size());
+        for (auto argSymTabEntry: *routineId->getRoutineParameters()) {
+            expectedArgType.push_back(argSymTabEntry->getType());
+            argType += typeToString(argSymTabEntry->getType());
+        }
+    }
+
+    // Only static functions
+    string functionName = "routine"+routineId->getName()+argType;//programName + routineId->getName() + argType;
+    string retpt = "returnpt" + to_string(static_cast<int>(rand()%9999));
+    char str[256];
+    emitRAW(
+    "\tLDA\tstptr\n"
+	"\tSUB\t#9\n"
+	"\tSUB\t#"+to_string(routineId->getRoutineSymtab()->sortedEntries().size()*3)+"\t.space for local vars\n"
+	"\tRMO\tA, X\n"
+    "\tRMO\tA, B\n"
+	"\tLDA\tstptr\n"
+	//"\tSTX\tstptr\n"
+	"\tSTA\t6, X\t.previous frame index\n"
+	"\tLDL\t#"+retpt+"\n"
+	"\tSTL\t0, X	.Return address\n"
+	"\tLDA\t#1	.value Inserted by compiler\n"
+	"\tSTA\t3, X	.scope\n");
+    if (argListCtx) {
+        emitComment("Add parameters to stack");
+        for (unsigned int i = 0; i < argListCtx->argument().size(); i++) {
+            auto argCtx = argListCtx->argument(i);
+            compiler->visit(argCtx->expression());
+            /*if (argCtx->expression()->type != expectedArgType[i])
+                //emitCast(argCtx->expression()->type, expectedArgType[i]);
+                std::cerr << "Cast not implemented" << std::endl;*/
+            emitRAW(            
+                //"\tLDX\tstptr\n"
+                "\tRMO\tB, X\n"
+                "\tSTA\t"+to_string(9+3*i)+",X\n");
+        }
+    }
+	emitRAW(
+    "\tSTB\tstptr\n"
+    "\tJSUB\t"+functionName+"\n"
+    ""+retpt+"\tRMO\tA, A\n");
+}
+
+void StatementGenerator::emitWrite(PascalParser::WriteStatementContext *ctx)
+{
+    emitWrite(ctx->writeArguments(), false);
+}
+
+void StatementGenerator::emitWriteln(PascalParser::WritelnStatementContext *ctx)
+{
+    std::cerr << "emitWriteLn not implemented" << std::endl;
+    emitWrite(ctx->writeArguments(), true);
+}
+
+void StatementGenerator::emitWrite(PascalParser::WriteArgumentsContext *argsCtx,
+                      bool needLF)
+{
+    std::cerr << "emitWrite not implemented" << std::endl;
+}
+
+int StatementGenerator::createWriteFormat(
+                                PascalParser::WriteArgumentsContext *argsCtx,
+                                string& format, bool needLF)
+{
+
+    return 0;
+}
+
+void StatementGenerator::emitArgumentsArray(
+                    PascalParser::WriteArgumentsContext *argsCtx, int exprCount)
+{
+    // Create the arguments array.
+    emitLoadConstant(exprCount);
+    emit(ANEWARRAY, "java/lang/Object");
+
+    int index = 0;
+
+    // Loop over the write arguments to fill the arguments array.
+    for (PascalParser::WriteArgumentContext *argCtx :
+                                                argsCtx->writeArgument())
+    {
+        string argText = argCtx->getText();
+        PascalParser::ExpressionContext *exprCtx = argCtx->expression();
+        Typespec *type = exprCtx->type->baseType();
+
+        // Skip string constants, which were made part of
+        // the format string.
+        if (argText[0] != '\'')
+        {
+            emit(DUP);
+            emitLoadConstant(index++);
+
+            compiler->visit(exprCtx);
+
+            Form form = type->getForm();
+            if (    ((form == SCALAR) || (form == ENUMERATION))
+                 && (type != Predefined::stringType))
+            {
+                emit(INVOKESTATIC, valueOfSignature(type));
+            }
+
+            // Store the value into the array.
+            emit(AASTORE);
+        }
+    }
+}
+
+void StatementGenerator::emitRead(PascalParser::ReadStatementContext *ctx)
+{
+    emitRead(ctx->readArguments(), false);
+}
+
+void StatementGenerator::emitReadln(PascalParser::ReadlnStatementContext *ctx)
+{
+    emitRead(ctx->readArguments(), true);
+}
+
+void StatementGenerator::emitRead(PascalParser::ReadArgumentsContext *argsCtx,
+                                  bool needSkip)
+{
+    
+}
+
+}} // namespace backend::compiler
