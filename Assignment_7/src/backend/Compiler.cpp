@@ -99,6 +99,7 @@ Object Compiler::visitNumberFactor(PascalParser::NumberFactorContext *ctx)
     }
     else
     {
+        std::cerr << "emitLoadRealConstant not imp" << std::endl;
         expressionCode->emitLoadRealConstant(ctx->number());
     }
 

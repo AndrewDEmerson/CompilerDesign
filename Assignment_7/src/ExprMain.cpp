@@ -16,7 +16,7 @@
 #include "intermediate/type/Typespec.h"
 
 static const bool print_tokens = false;
-static const bool print_tree = false;
+static const bool print_tree = true;
 static const bool print_tables = false;
 
 int main(int argc, const char *argv[]) {
@@ -72,7 +72,7 @@ int main(int argc, const char *argv[]) {
   if (print_tables) {
     pass->printSymTableStack();
     output.close();
-    freopen("output.txt", "a", stdout);
+    //freopen("output.txt", "a", stdout);
     pass->printSymTableStack();
   }
   

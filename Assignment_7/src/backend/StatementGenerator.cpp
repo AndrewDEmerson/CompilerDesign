@@ -14,6 +14,18 @@ namespace backend { namespace compiler {
 using namespace std;
 using namespace intermediate;
 
+string StatementGenerator::typeToString(Typespec *type){
+    static std::map<Typespec*,string> typeMap= {
+            {Predefined::integerType,"I"},
+            {Predefined::charType,"C"},
+            {Predefined::booleanType,"Z"},
+            {Predefined::realType,"F"},
+            {Predefined::stringType,"S"},
+            {Predefined::undefinedType,"V"}
+    };
+    return typeMap[type];
+}
+
 void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext *ctx)
 {
     PascalParser::VariableContext *varCtx  = ctx->lhs()->variable();
@@ -100,6 +112,8 @@ void StatementGenerator::emitProcedureCall(PascalParser::ProcedureCallStatementC
 
 void StatementGenerator::emitFunctionCall(PascalParser::FunctionCallContext *ctx)
 {
+    emitComment("emittingFunctionCall");
+    emitCall(ctx->functionName()->entry,ctx->argumentList());
     /***** Complete this member function. *****/
 }
 
@@ -107,6 +121,52 @@ void StatementGenerator::emitCall(SymtabEntry *routineId,
                                   PascalParser::ArgumentListContext *argListCtx)
 {
     /***** Complete this member function. *****/
+    string argType;
+
+    if (argListCtx) {
+        std::vector<Typespec *> expectedArgType;
+        expectedArgType.reserve(argListCtx->argument().size());
+        for (auto argSymTabEntry: *routineId->getRoutineParameters()) {
+            expectedArgType.push_back(argSymTabEntry->getType());
+            argType += typeToString(argSymTabEntry->getType());
+        }
+    }
+
+    // Only static functions
+    string functionName = "routine"+routineId->getName()+argType;//programName + routineId->getName() + argType;
+    string retpt = "returnpt" + to_string(static_cast<int>(rand()%9999));
+    char str[256];
+    emitRAW(
+    "\tLDA\tstptr\n"
+	"\tSUB\t#9\n"
+	"\tSUB\t#"+to_string(routineId->getRoutineSymtab()->sortedEntries().size()*3)+"\t.space for local vars\n"
+	"\tRMO\tA, X\n"
+    "\tRMO\tA, B\n"
+	"\tLDA\tstptr\n"
+	//"\tSTX\tstptr\n"
+	"\tSTA\t6, X\t.previous frame index\n"
+	"\tLDL\t#"+retpt+"\n"
+	"\tSTL\t0, X	.Return address\n"
+	"\tLDA\t#1	.value Inserted by compiler\n"
+	"\tSTA\t3, X	.scope\n");
+    if (argListCtx) {
+        emitComment("Add parameters to stack");
+        for (unsigned int i = 0; i < argListCtx->argument().size(); i++) {
+            auto argCtx = argListCtx->argument(i);
+            compiler->visit(argCtx->expression());
+            /*if (argCtx->expression()->type != expectedArgType[i])
+                //emitCast(argCtx->expression()->type, expectedArgType[i]);
+                std::cerr << "Cast not implemented" << std::endl;*/
+            emitRAW(            
+                //"\tLDX\tstptr\n"
+                "\tRMO\tB, X\n"
+                "\tSTA\t"+to_string(9+3*i)+",X\n");
+        }
+    }
+	emitRAW(
+    "\tSTB\tstptr\n"
+    "\tJSUB\t"+functionName+"\n"
+    ""+retpt+"\tRMO\tA, A\n");
 }
 
 void StatementGenerator::emitWrite(PascalParser::WriteStatementContext *ctx)
@@ -116,100 +176,22 @@ void StatementGenerator::emitWrite(PascalParser::WriteStatementContext *ctx)
 
 void StatementGenerator::emitWriteln(PascalParser::WritelnStatementContext *ctx)
 {
+    std::cerr << "emitWriteLn not implemented" << std::endl;
     emitWrite(ctx->writeArguments(), true);
 }
 
 void StatementGenerator::emitWrite(PascalParser::WriteArgumentsContext *argsCtx,
                       bool needLF)
 {
-    emit(GETSTATIC, "java/lang/System/out", "Ljava/io/PrintStream;");
-
-    // WRITELN with no arguments.
-    if (argsCtx == nullptr)
-    {
-        emit(INVOKEVIRTUAL, "java/io/PrintStream.println()V");
-        localStack->decrease(1);
-    }
-
-    // Generate code for the arguments.
-    else
-    {
-        string format;
-        int exprCount = createWriteFormat(argsCtx, format, needLF);
-
-        // Load the format string.
-        emit(LDC, format);
-
-        // Emit the arguments array.
-       if (exprCount > 0)
-        {
-            emitArgumentsArray(argsCtx, exprCount);
-
-            emit(INVOKEVIRTUAL,
-                        string("java/io/PrintStream/printf(Ljava/lang/String;")
-                      + string("[Ljava/lang/Object;)")
-                      + string("Ljava/io/PrintStream;"));
-            localStack->decrease(2);
-            emit(POP);
-        }
-        else
-        {
-            emit(INVOKEVIRTUAL,
-                 "java/io/PrintStream/print(Ljava/lang/String;)V");
-            localStack->decrease(2);
-        }
-    }
+    std::cerr << "emitWrite not implemented" << std::endl;
 }
 
 int StatementGenerator::createWriteFormat(
                                 PascalParser::WriteArgumentsContext *argsCtx,
                                 string& format, bool needLF)
 {
-    int exprCount = 0;
-    format += "\"";
 
-    // Loop over the write arguments.
-    for (PascalParser::WriteArgumentContext *argCtx : argsCtx->writeArgument())
-    {
-        Typespec *type = argCtx->expression()->type;
-        string argText = argCtx->getText();
-
-        // Append any literal strings.
-        if (argText[0] == '\'') format += convertString(argText, true);
-
-        // For any other expressions, append a field specifier.
-        else
-        {
-            exprCount++;
-            format.append("%");
-
-            PascalParser::FieldWidthContext *fwCtx = argCtx->fieldWidth();
-            if (fwCtx != nullptr)
-            {
-                string sign = (   (fwCtx->sign() != nullptr)
-                               && (fwCtx->sign()->getText() == "-")) ? "-" : "";
-                format += sign + fwCtx->integerConstant()->getText();
-
-                PascalParser::DecimalPlacesContext *dpCtx =
-                                                        fwCtx->decimalPlaces();
-                if (dpCtx != nullptr)
-                {
-                    format += "." + dpCtx->integerConstant()->getText();
-                }
-            }
-
-            string typeFlag = type == Predefined::integerType ? "d"
-                            : type == Predefined::realType    ? "f"
-                            : type == Predefined::booleanType ? "b"
-                            : type == Predefined::charType    ? "c"
-                            :                                  "s";
-            format += typeFlag;
-        }
-    }
-
-    format += needLF ? "\\n\"" : "\"";
-
-    return exprCount;
+    return 0;
 }
 
 void StatementGenerator::emitArgumentsArray(
@@ -264,65 +246,7 @@ void StatementGenerator::emitReadln(PascalParser::ReadlnStatementContext *ctx)
 void StatementGenerator::emitRead(PascalParser::ReadArgumentsContext *argsCtx,
                                   bool needSkip)
 {
-    int size = argsCtx->variable().size();
-
-    // Loop over read arguments.
-    for (int i = 0; i < size; i++)
-    {
-        PascalParser::VariableContext *varCtx = argsCtx->variable()[i];
-        Typespec *varType = varCtx->type;
-
-        if (varType == Predefined::integerType)
-        {
-            emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
-            emit(INVOKEVIRTUAL, "java/util/Scanner/nextInt()I");
-            emitStoreValue(varCtx->entry, nullptr);
-        }
-        else if (varType == Predefined::realType)
-        {
-            emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
-            emit(INVOKEVIRTUAL, "java/util/Scanner/nextFloat()F");
-            emitStoreValue(varCtx->entry, nullptr);
-        }
-        else if (varType == Predefined::booleanType)
-        {
-            emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
-            emit(INVOKEVIRTUAL, "java/util/Scanner/nextBoolean()Z");
-            emitStoreValue(varCtx->entry, nullptr);
-        }
-        else if (varType == Predefined::charType)
-        {
-            emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
-            emit(LDC, "\"\"");
-            emit(INVOKEVIRTUAL,
-                 string("java/util/Scanner/useDelimiter(Ljava/lang/String;)") +
-                 string("Ljava/util/Scanner;"));
-            emit(POP);
-            emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
-            emit(INVOKEVIRTUAL, "java/util/Scanner/next()Ljava/lang/String;");
-            emit(ICONST_0);
-            emit(INVOKEVIRTUAL, "java/lang/String/charAt(I)C");
-            emitStoreValue(varCtx->entry, nullptr);
-
-            emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
-            emit(INVOKEVIRTUAL, "java/util/Scanner/reset()Ljava/util/Scanner;");
-
-        }
-        else  // string
-        {
-            emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
-            emit(INVOKEVIRTUAL, "java/util/Scanner/next()Ljava/lang/String;");
-            emitStoreValue(varCtx->entry, nullptr);
-        }
-    }
-
-    // READLN: Skip the rest of the input line.
-    if (needSkip)
-    {
-        emit(GETSTATIC, programName + "/_sysin Ljava/util/Scanner;");
-        emit(INVOKEVIRTUAL, "java/util/Scanner/nextLine()Ljava/lang/String;");
-        emit(POP);
-    }
+    
 }
 
 }} // namespace backend::compiler

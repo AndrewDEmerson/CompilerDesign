@@ -94,6 +94,8 @@ public:
     void emitReadln(PascalParser::ReadlnStatementContext *ctx);
 
 private:
+    string typeToString(Typespec* type);
+
     /**
      * Process the CASE map from the CASE branches.
      * @param branchListCtx the CaseBranchListContext.

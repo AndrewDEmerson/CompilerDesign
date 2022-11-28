@@ -13,6 +13,8 @@ namespace backend { namespace compiler {
 
 using namespace std;
 
+static const size_t STACKSIZE = 64;
+
 void ProgramGenerator::emitProgram(PascalParser::ProgramContext *ctx)
 {
     programId = ctx->programHeader()->programIdentifier()->entry;
@@ -20,53 +22,18 @@ void ProgramGenerator::emitProgram(PascalParser::ProgramContext *ctx)
 
     localVariables = new LocalVariables(programLocalsCount);
 
-    emitRecords(programSymtab);
-
-    emitDirective(CLASS_PUBLIC, programName);
-    emitDirective(SUPER, "java/lang/Object");
+    emitRAW("prog\tSTART\t0\n\tEND\tfirst\n");
+    emitRAW(
+        ".stack variables\n"
+        "stack\tRESW\t"+to_string(STACKSIZE)+"\n"
+        "stptr\tRESW\t1\n"
+        );
 
     emitProgramVariables();
-    emitInputScanner();
-    emitConstructor();
+    //emitInputScanner();
     emitSubroutines(ctx->block()->declarations()->routinesPart());
-
     emitMainMethod(ctx);
-}
-
-void ProgramGenerator::emitRecords(Symtab *symtab)
-{
-    for (SymtabEntry *id : symtab->sortedEntries())
-    {
-        if (   (id->getKind() == TYPE)
-            && (id->getType()->getForm() == RECORD))
-        {
-            new Compiler(compiler, id);
-        }
-    }
-}
-
-void ProgramGenerator::emitRecord(SymtabEntry *recordId, string namePath)
-{
-    Symtab *recordSymtab = recordId->getType()->getRecordSymtab();
-
-    emitDirective(CLASS_PUBLIC, namePath);
-    emitDirective(SUPER, "java/lang/Object");
-    emitLine();
-
-    // Emit code for any nested records.
-    emitRecords(recordSymtab);
-
-    // Emit record fields.
-    for (SymtabEntry *id : recordSymtab->sortedEntries())
-    {
-        if (id->getKind() == RECORD_FIELD)
-        {
-            emitDirective(FIELD, id->getName(), typeDescriptor(id));
-        }
-    }
-
-    emitConstructor();
-    close();  // the object file
+    close();
 }
 
 void ProgramGenerator::emitProgramVariables()
@@ -76,8 +43,9 @@ void ProgramGenerator::emitProgramVariables()
     Symtab *symtab = programId->getRoutineSymtab();
     vector<SymtabEntry *> ids = symtab->sortedEntries();
 
-    emitLine();
-    emitDirective(FIELD_PRIVATE_STATIC, "_sysin", "Ljava/util/Scanner;");
+
+    //emitLine();
+    emitComment("VARIABLE DECLARATIONS");
 
     // Loop over all the program's identifiers and
     // emit a .field directive for each variable.
@@ -85,8 +53,12 @@ void ProgramGenerator::emitProgramVariables()
     {
         if (id->getKind() == VARIABLE)
         {
-            emitDirective(FIELD_PRIVATE_STATIC, id->getName(),
-                          typeDescriptor(id));
+            //emitDirective(FIELD_PRIVATE_STATIC, id->getName(),typeDescriptor(id));
+            if(typeDescriptor(id) == "S"){
+                emitRAW(id->getName()+"\tRESW\t256\n");
+            }else{
+                emitRAW(id->getName()+"\tRESW\t1\n");
+            }
         }
     }
 }
@@ -113,26 +85,6 @@ void ProgramGenerator::emitInputScanner()
     localStack->reset();
 }
 
-void ProgramGenerator::emitConstructor()
-{
-    emitLine();
-    emitComment("Main class constructor");
-    emitDirective(METHOD_PUBLIC, "<init>()V");
-    emitDirective(VAR, "0 is this L" + programName + ";");
-    emitLine();
-
-    emit(ALOAD_0);
-    emit(INVOKESPECIAL, "java/lang/Object/<init>()V");
-    emit(RETURN);
-
-    emitLine();
-    emitDirective(LIMIT_LOCALS, 1);
-    emitDirective(LIMIT_STACK,  1);
-    emitDirective(END_METHOD);
-
-    localStack->reset();
-}
-
 void ProgramGenerator::emitSubroutines(PascalParser::RoutinesPartContext *ctx)
 {
     if (ctx != nullptr)
@@ -149,10 +101,7 @@ void ProgramGenerator::emitSubroutines(PascalParser::RoutinesPartContext *ctx)
 void ProgramGenerator::emitMainMethod(PascalParser::ProgramContext *ctx)
 {
     emitLine();
-    emitComment("MAIN");
-    emitDirective(METHOD_PUBLIC_STATIC,
-                              "main([Ljava/lang/String;)V");
-
+    emitComment("Main Method");
     emitMainPrologue(programId);
 
     // Emit code to allocate any arrays, records, and strings.
@@ -168,58 +117,18 @@ void ProgramGenerator::emitMainMethod(PascalParser::ProgramContext *ctx)
 
 void ProgramGenerator::emitMainPrologue(SymtabEntry *programId)
 {
-    emitDirective(VAR, "0 is args [Ljava/lang/String;");
-    emitDirective(VAR, "1 is _start Ljava/time/Instant;");
-    emitDirective(VAR, "2 is _end Ljava/time/Instant;");
-    emitDirective(VAR, "3 is _elapsed J");
-
-    // Runtime timer.
-    emitLine();
-    emit(INVOKESTATIC, "java/time/Instant/now()Ljava/time/Instant;");
     localStack->increase(1);
-    emit(ASTORE_1);
+    // Tell computer where first instruction is, and init stackpointer to point to stack
+    emitRAW(
+    "first\tLDA	#stack\n"
+	"\tADD\t#"+to_string((STACKSIZE-1)*3)+"\n"
+	"\tSTA\tstptr\n");
 }
 
 void ProgramGenerator::emitMainEpilogue()
-{
-    // Print the execution time.
-    emitLine();
-    emit(INVOKESTATIC, "java/time/Instant/now()Ljava/time/Instant;");
-    localStack->increase(1);
-    emit(ASTORE_2);
-    emit(ALOAD_1);
-    emit(ALOAD_2);
-    emit(INVOKESTATIC,
-         string("java/time/Duration/between(Ljava/time/temporal/Temporal;") +
-         string("Ljava/time/temporal/Temporal;)Ljava/time/Duration;"));
-    localStack->decrease(1);
-    emit(INVOKEVIRTUAL, "java/time/Duration/toMillis()J");
-    localStack->increase(1);
-    emit(LSTORE_3);
-    emit(GETSTATIC, "java/lang/System/out Ljava/io/PrintStream;");
-    emit(LDC, "\"\\n[%,d milliseconds execution time.]\\n\"");
-    emit(ICONST_1);
-    emit(ANEWARRAY, "java/lang/Object");
-    emit(DUP);
-    emit(ICONST_0);
-    emit(LLOAD_3);
-    emit(INVOKESTATIC, "java/lang/Long/valueOf(J)Ljava/lang/Long;");
-    emit(AASTORE);
-    emit(INVOKEVIRTUAL,
-         string("java/io/PrintStream/printf(Ljava/lang/String;") +
-         string("[Ljava/lang/Object;)Ljava/io/PrintStream;"));
-    localStack->decrease(2);
-    emit(POP);
-
-    emitLine();
-    emit(RETURN);
-    emitLine();
-
-    emitDirective(LIMIT_LOCALS, localVariables->count());
-    emitDirective(LIMIT_STACK,  localStack->capacity());
-    emitDirective(END_METHOD);
-
-    close();  // the object file
+{   
+    emitComment("End Of Program, Halt");
+    emitRAW("HALT\tJ\tHALT\n");
 }
 
 void ProgramGenerator::emitRoutine(PascalParser::RoutineDefinitionContext *ctx)
@@ -233,25 +142,24 @@ void ProgramGenerator::emitRoutine(PascalParser::RoutineDefinitionContext *ctx)
     emitRoutineLocals(routineId);
 
     // Generate code to allocate any arrays, records, and strings.
-    StructuredDataGenerator structuredCode(this, compiler);
-    structuredCode.emitData(routineId);
+    //StructuredDataGenerator structuredCode(this, compiler);
+    //structuredCode.emitData(routineId);
 
     localVariables = new LocalVariables(routineSymtab->getMaxSlotNumber());
 
     // Emit code for the compound statement.
-    PascalParser::CompoundStatementContext *stmtCtx =
-        (PascalParser::CompoundStatementContext *) routineId->getExecutable();
+    PascalParser::CompoundStatementContext *stmtCtx = (PascalParser::CompoundStatementContext *) routineId->getExecutable();
     compiler->visit(stmtCtx);
 
     emitRoutineReturn(routineId);
-    emitRoutineEpilogue();
+    //emitRoutineEpilogue();
 }
 
 void ProgramGenerator::emitRoutineHeader(SymtabEntry *routineId)
 {
     string routineName = routineId->getName();
     vector<SymtabEntry *> *parmIds = routineId->getRoutineParameters();
-    string header(routineName + "(");
+    string header(routineName);
 
     // Parameter and return type descriptors.
     if (parmIds != nullptr)
@@ -261,7 +169,7 @@ void ProgramGenerator::emitRoutineHeader(SymtabEntry *routineId)
             header += typeDescriptor(parmId);
         }
     }
-    header += ")" + typeDescriptor(routineId);
+    //header += typeDescriptor(routineId);
 
     emitLine();
     if (routineId->getKind() == PROCEDURE)
@@ -273,11 +181,13 @@ void ProgramGenerator::emitRoutineHeader(SymtabEntry *routineId)
         emitComment("FUNCTION " + routineName);
     }
 
-    emitDirective(METHOD_PRIVATE_STATIC, header);
+    //emitDirective(METHOD_PRIVATE_STATIC, header);
+    emitRAW("routine"+header+ "\tRMO\tA,A\n");
 }
 
 void ProgramGenerator::emitRoutineLocals(SymtabEntry *routineId)
-{
+{   
+    //TODO: NOT NEEDED?
     Symtab *symtab = routineId->getRoutineSymtab();
     vector<SymtabEntry *> ids = symtab->sortedEntries();
 
@@ -293,16 +203,15 @@ void ProgramGenerator::emitRoutineLocals(SymtabEntry *routineId)
                                || (kind == REFERENCE_PARAMETER))
         {
             int slot = id->getSlotNumber();
-            emitDirective(VAR, to_string(slot) + " is " + id->getName(),
-                          typeDescriptor(id));
+            //emitDirective(VAR, to_string(slot) + " is " + id->getName(),typeDescriptor(id));
+            emitComment("store value in slot " + id->getName() + " "+ to_string(slot));
         }
     }
 }
 
 void ProgramGenerator::emitRoutineReturn(SymtabEntry *routineId)
 {
-    emitLine();
-
+    
     // Function: Return the value in the implied function variable.
     if (routineId->getKind() == FUNCTION)
     {
@@ -311,20 +220,27 @@ void ProgramGenerator::emitRoutineReturn(SymtabEntry *routineId)
         // Get the slot number of the function variable.
         string varName = routineId->getName();
         SymtabEntry *varId = routineId->getRoutineSymtab()->lookup(varName);
+        emitComment("Return a Value");
         emitLoadLocal(type, varId->getSlotNumber());
-        emitReturnValue(type);
     }
 
+    emitLine();
     // Procedure: Just return.
-    else emit(RETURN);
+    emitRAW("\t.return\n"
+	//"\tLDX\t#stack\n"
+	"\tLDX\tstptr\n"
+	"\tLDL\t0, X\n"
+	"\tLDT\t6, X\n"
+	"\tSTT\tstptr\n"
+	"\tRSUB\n");
 }
 
 void ProgramGenerator::emitRoutineEpilogue()
 {
-    emitLine();
-    emitDirective(LIMIT_LOCALS, localVariables->count());
-    emitDirective(LIMIT_STACK,  localStack->capacity());
-    emitDirective(END_METHOD);
+    // emitLine();
+    // emitDirective(LIMIT_LOCALS, localVariables->count());
+    // emitDirective(LIMIT_STACK,  localStack->capacity());
+    // emitDirective(END_METHOD);
 }
 
 }} // namespace backend::compiler

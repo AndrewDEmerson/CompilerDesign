@@ -58,15 +58,18 @@ void CodeGenerator::emitLine()
     objectFile->flush();
 }
 
+void CodeGenerator::emitRAW(string text){
+    *objectFile << text;
+    objectFile->flush();
+}
+
 /**
  * Emit a comment.
  * @param text the comment text.
  */
 void CodeGenerator::emitComment(string text)
 {
-    *objectFile << ";" << endl;
-    *objectFile << "; " << text << endl;
-    *objectFile << ";" << endl;
+    *objectFile << ". " << text << endl;
     objectFile->flush();
 }
 
@@ -221,25 +224,7 @@ void CodeGenerator::emit(Instruction instruction,
  */
 void CodeGenerator::emitLoadConstant(int value)
 {
-    switch (value)
-    {
-        case -1: emit(ICONST_M1); break;
-        case  0: emit(ICONST_0);  break;
-        case  1: emit(ICONST_1);  break;
-        case  2: emit(ICONST_2);  break;
-        case  3: emit(ICONST_3);  break;
-        case  4: emit(ICONST_4);  break;
-        case  5: emit(ICONST_5);  break;
-
-        default:
-        {
-            if (   (-128 <= value)
-                && (value <= 127))        emit(BIPUSH, value);
-            else if (   (-32768 <= value)
-                     && (value <= 32767)) emit(SIPUSH, value);
-            else                          emit(LDC, value);
-        }
-    }
+    emitRAW("\tLDA\t#"+to_string(value)+"\n");
 }
 
 /**
@@ -256,7 +241,7 @@ void CodeGenerator::emitLoadConstant(double value)
 
 void CodeGenerator::emitLoadConstant(string value)
 {
-    emit(LDC, "\"" + value + "\"");
+    //emitRAW(LDC, "\"" + value + "\"");
 }
 
 void CodeGenerator::emitLoadValue(SymtabEntry *variableId)
@@ -272,6 +257,7 @@ void CodeGenerator::emitLoadValue(SymtabEntry *variableId)
 
         if (type == Predefined::integerType)
         {
+            emitComment("Emiiting a constant");
             emitLoadConstant(value.as<int>());
         }
         else if (type == Predefined::realType)
@@ -289,19 +275,13 @@ void CodeGenerator::emitLoadValue(SymtabEntry *variableId)
         }
     }
 
-    // Enumeration constant
-    else if (kind == ENUMERATION_CONSTANT)
-    {
-        Object value = variableId->getValue();
-        emitLoadConstant(value.as<int>());
-    }
-
     // Program variable.
     else if (nestingLevel == 1)
     {
         string variableName = variableId->getName();
-        string name = programName + "/" + variableName;
-        emit(GETSTATIC, name, typeDescriptor(type));
+        //string name = programName + "/" + variableName;
+        //emit(GETSTATIC, name, typeDescriptor(type));
+        emitRAW("\tLDA\t"+variableName+"\n");
     }
 
     // Local variable.
@@ -332,16 +312,11 @@ void CodeGenerator::emitLoadLocal(Typespec *type, int index)
         || (type == Predefined::charType)
         || (form == ENUMERATION))
     {
-        switch (index)
-        {
-            case 0:  emit(ILOAD_0); break;
-            case 1:  emit(ILOAD_1); break;
-            case 2:  emit(ILOAD_2); break;
-            case 3:  emit(ILOAD_3); break;
-            default: emit(ILOAD, index);
-        }
+        emitRAW(
+            "\tLDX\tstptr\n"
+            "\tLDA\t"+to_string(9+3*index)+",X\n");
     }
-    else if (type == Predefined::realType)
+    /*else if (type == Predefined::realType)
     {
         switch (index) {
             case 0:  emit(FLOAD_0); break;
@@ -361,6 +336,10 @@ void CodeGenerator::emitLoadLocal(Typespec *type, int index)
             case 3:  emit(ALOAD_3); break;
             default: emit(ALOAD, index);
         }
+    }*/
+    else{
+        std::cerr << "returning of non-int types not currently supported" << std::endl;
+        exit(-6);
     }
 }
 
@@ -397,7 +376,10 @@ void CodeGenerator::emitStoreToUnmodifiedVariable(SymtabEntry *targetId,
         string name = programName + "/" + targetName;
 
         emitRangeCheck(targetType);
-        emit(PUTSTATIC, name, typeDescriptor(targetType->baseType()));
+        char str[32];
+        sprintf(str,"\tSTA\t%s\n",targetName.c_str());
+        emitRAW(str);
+        //emit(PUTSTATIC, name, typeDescriptor(targetType->baseType()));
     }
 
     // Local variable.
@@ -410,6 +392,7 @@ void CodeGenerator::emitStoreToUnmodifiedVariable(SymtabEntry *targetId,
 
 void CodeGenerator::emitStoreLocal(Typespec *type, int slot)
 {
+    emitComment("emiting storelocal");
     Form form = SCALAR;
 
     if (type != nullptr)
@@ -423,16 +406,11 @@ void CodeGenerator::emitStoreLocal(Typespec *type, int slot)
         || (type == Predefined::charType)
         || (form == ENUMERATION))
     {
-        switch (slot)
-        {
-            case 0:  emit(ISTORE_0); break;
-            case 1:  emit(ISTORE_1); break;
-            case 2:  emit(ISTORE_2); break;
-            case 3:  emit(ISTORE_3); break;
-            default: emit(ISTORE, slot);
-        }
+        emitRAW(
+            "\tLDX\tstptr\n"
+            "\tSTA\t"+to_string(9+3*slot)+",X\n");
     }
-    else if (type == Predefined::realType)
+    /*else if (type == Predefined::realType)
     {
         switch (slot) {
             case 0:  emit(FSTORE_0); break;
@@ -452,6 +430,10 @@ void CodeGenerator::emitStoreLocal(Typespec *type, int slot)
             case 3:  emit(ASTORE_3); break;
             default: emit(ASTORE, slot);
         }
+    }*/
+    else{
+        std::cerr << "non-int not supported" << std::endl;
+        exit(-7);
     }
 }
 
@@ -515,24 +497,6 @@ void CodeGenerator::emitCheckCastClass(Typespec *type)
     emit(CHECKCAST, descriptor);
 }
 
-void CodeGenerator::emitReturnValue(Typespec *type)
-{
-    Form form = SCALAR;
-
-    if (type != nullptr)
-    {
-        type = type->baseType();
-        form = type->getForm();
-    }
-
-    if (   (type == Predefined::integerType)
-        || (type == Predefined::booleanType)
-        || (type == Predefined::charType)
-        || (form == ENUMERATION))          emit(IRETURN);
-    else if (type == Predefined::realType) emit(FRETURN);
-    else                                   emit(ARETURN);
-}
-
 void CodeGenerator::emitRangeCheck(Typespec *targetType)
 {
 //        if (targetType.getForm() == SUBRANGE)
@@ -577,7 +541,7 @@ string CodeGenerator::typeDescriptor(Typespec *pascalType)
     else if (pascalType == Predefined::realType)    str = "F";
     else if (pascalType == Predefined::booleanType) str = "Z";
     else if (pascalType == Predefined::charType)    str = "C";
-    else if (pascalType == Predefined::stringType)  str = "Ljava/lang/String;";
+    else if (pascalType == Predefined::stringType)  str = "S";
     else if (form == ENUMERATION)                  str = "I";
     else /* (form == RECORD) */ str = "L" + pascalType->getRecordTypePath() + ";";
 

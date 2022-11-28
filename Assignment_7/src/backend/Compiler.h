@@ -37,7 +37,7 @@ public:
      */
     Compiler(SymtabEntry *programId)
         : programId(programId), programName(programId->getName()),
-          code(new CodeGenerator(programName, "j", this)),
+          code(new CodeGenerator(programName, "asm", this)),
           programCode(nullptr), statementCode(nullptr),
           expressionCode(nullptr) {}
 

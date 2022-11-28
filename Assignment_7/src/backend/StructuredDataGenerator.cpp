@@ -36,7 +36,11 @@ void StructuredDataGenerator::emitData(SymtabEntry *routineId)
             Form form = type->getForm();
 
             if      (form == ARRAY)  emitAllocateArray(id, type);
-            else if (form == RECORD) emitAllocateRecord(id, type, DUP);
+            //else if (form == RECORD) emitAllocateRecord(id, type, DUP);
+            else{
+                std::cerr << "unsupported data type" << std::endl;
+                exit(-9);
+            }
         }
     }
 }
@@ -58,7 +62,7 @@ void StructuredDataGenerator::emitAllocateArray(SymtabEntry *targetId,
     {
         int elmtCount = elmtType->getArrayElementCount();
         ++dimensionCount;
-        emitLoadConstant(elmtCount);
+        //emitLoadConstant(elmtCount);
         elmtType = elmtType->getArrayElementType();
     } while (elmtType->getForm() == ARRAY);
 
@@ -70,30 +74,22 @@ void StructuredDataGenerator::emitAllocateArray(SymtabEntry *targetId,
         : elmtType == Predefined::realType    ? "float"
         : elmtType == Predefined::booleanType ? "bool"
         : elmtType == Predefined::charType    ? "char"
-        : elmtType == Predefined::stringType  ? "java/lang/String"
-        : elmtForm == ENUMERATION             ? "int"
-        : elmtForm == RECORD                  ? elmtType->getIdentifier()
-                                                        ->getName()
+        : elmtType == Predefined::stringType  ? "string"
         :                                       nullptr;
 
     // One-dimensional array.
     if (dimensionCount == 1)
     {
-        if (elmtType->getForm() == RECORD)
-        {
-            emit(ANEWARRAY, elmtType->getRecordTypePath());
-            emit(DUP);
-        }
-        else if (elmtType == Predefined::stringType)
+        if (elmtType == Predefined::stringType)
         {
             emit(ANEWARRAY, typeName);
         }
         else
         {
-            emit(NEWARRAY, typeName);
+            //emit(NEWARRAY, typeName);
+            emitComment("ALLOCATE ARRAY HERE: "+ typeName + " "+ to_string(elmtType->baseType()->getSubrangeMaxValue()));
         }
     }
-
     // Multidimensional array.
     else
     {
@@ -106,14 +102,6 @@ void StructuredDataGenerator::emitAllocateArray(SymtabEntry *targetId,
 
     // Store the allocation into the array variable.
     emitStoreValue(targetId, targetId->getType());
-
-    // Allocate data for record elements.
-    if (elmtType->getForm() == RECORD)
-    {
-        emitAllocateArrayElements(targetId, targetId->getType(),
-                                  1, dimensionCount);
-        emit(POP);
-    }
 }
 
 void StructuredDataGenerator::emitAllocateArrayElements(

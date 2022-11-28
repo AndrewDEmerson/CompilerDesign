@@ -106,6 +106,7 @@ public:
      */
     void emitComment(PascalParser::StatementContext *ctx);
 
+    void emitRAW(string text);
     /**
      * Emit a label.
      * @param label the label.

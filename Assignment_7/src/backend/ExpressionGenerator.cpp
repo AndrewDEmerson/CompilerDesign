@@ -11,6 +11,7 @@ namespace backend { namespace compiler {
 
 void ExpressionGenerator::emitExpression(PascalParser::ExpressionContext *ctx)
 {
+    //emitRAW("\tLDA\t#0");
     PascalParser::SimpleExpressionContext *simpleCtx1 =
                                             ctx->simpleExpression()[0];
     PascalParser::RelOpContext *relOpCtx = ctx->relOp();
@@ -108,6 +109,7 @@ void ExpressionGenerator::emitSimpleExpression(PascalParser::SimpleExpressionCon
     // First term.
     PascalParser::TermContext *termCtx1 = ctx->term()[0];
     Typespec *type1 = termCtx1->type;
+    //emitRAW("\tCLEAR\tA\n");
     emitTerm(termCtx1);
 
     if (negate) emit(type1 == Predefined::integerType ? INEG : FNEG);
@@ -143,12 +145,16 @@ void ExpressionGenerator::emitSimpleExpression(PascalParser::SimpleExpressionCon
         {
             emitTerm(termCtx2);
 
-            if (op == "+") emit(IADD);
-            else           emit(ISUB);
+
+            if (op == "+") emitRAW("\tADDR\tS,A\n");//emit(IADD);
+            else           emitRAW("\tSUBR\tS,A\n");//emit(ISUB);
+
 //            localStack->decrease(1);
         }
         else if (realMode)
         {
+            std::cerr << "realMode not implemented" << std::endl;
+            exit(-1);
             if (type1 == Predefined::integerType) emit(I2F);
             emitTerm(termCtx2);
             if (type2 == Predefined::integerType) emit(I2F);
@@ -158,11 +164,15 @@ void ExpressionGenerator::emitSimpleExpression(PascalParser::SimpleExpressionCon
         }
         else if (booleanMode)
         {
+            std::cerr << "booleanMode not implemented" << std::endl;
+            exit(-2);
             emitTerm(termCtx2);
             emit(IOR);
         }
         else  // stringMode
         {
+            std::cerr << "stringMode not implemented" << std::endl;
+            exit(-3);
             emit(NEW, "java/lang/StringBuilder");
             emit(DUP_X1);
             emit(SWAP);
@@ -195,6 +205,7 @@ void ExpressionGenerator::emitTerm(PascalParser::TermContext *ctx)
     PascalParser::FactorContext *factorCtx1 = ctx->factor()[0];
     Typespec *type1 = factorCtx1->type;
     compiler->visit(factorCtx1);
+    return;
 
     // Loop over the subsequent factors.
     for (int i = 1; i < count; i++)
@@ -219,12 +230,14 @@ void ExpressionGenerator::emitTerm(PascalParser::TermContext *ctx)
 
         if (integerMode)
         {
-            compiler->visit(factorCtx2);
+            
 
-            if      (op == "*")   emit(IMUL);
-            else if (op == "/")   emit(FDIV);
-            else if (op == "div") emit(IDIV);
-            else if (op == "mod") emit(IREM);
+            if      (op == "*")   emitRAW("\tMUL\t");//emit(IMUL);
+            else if (op == "/")   emitRAW("\tDIV\t");//emit(FDIV);
+            else if (op == "div") emitRAW("\tDIV\t");//emit(IDIV);
+            else if (op == "mod") emitRAW("\tTODO:MODULO\t");//emit(IREM);
+
+            compiler->visit(factorCtx2);
         }
         else if (realMode)
         {
@@ -245,6 +258,8 @@ void ExpressionGenerator::emitTerm(PascalParser::TermContext *ctx)
 
 void ExpressionGenerator::emitNotFactor(PascalParser::NotFactorContext *ctx)
 {
+    std::cerr << "emitNotFactor not implemented" << std::endl;
+    exit(-5);
     compiler->visit(ctx->factor());
     emit(ICONST_1);
     emit(IXOR);
@@ -387,6 +402,7 @@ Typespec *ExpressionGenerator::emitLoadRecordField(
 
 void ExpressionGenerator::emitLoadIntegerConstant(PascalParser::NumberContext *intCtx)
 {
+    std::clog << "emiting loadIntegerConstant" << std::endl;
     int value = stoi(intCtx->getText());
     emitLoadConstant(value);
 }
