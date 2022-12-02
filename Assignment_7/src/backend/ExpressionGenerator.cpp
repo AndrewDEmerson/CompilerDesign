@@ -46,55 +46,34 @@ void ExpressionGenerator::emitExpression(PascalParser::ExpressionContext *ctx)
             characterMode = true;
         }
 
-        Label *trueLabel = new Label();
-        Label *exitLabel = new Label();
-
         if (integerMode || characterMode)
         {
-            emitSimpleExpression(simpleCtx2);
-
-            if      (op == "=" ) emit(IF_ICMPEQ, trueLabel);
-            else if (op == "<>") emit(IF_ICMPNE, trueLabel);
-            else if (op == "<" ) emit(IF_ICMPLT, trueLabel);
-            else if (op == "<=") emit(IF_ICMPLE, trueLabel);
-            else if (op == ">" ) emit(IF_ICMPGT, trueLabel);
-            else if (op == ">=") emit(IF_ICMPGE, trueLabel);
+            emitSimpleExpression(simpleCtx2);            
+            if      (op == "=" ) emitRAW("\tCOMP " + simpleCtx1->getText() + "\n\tJEQ ");
+            else if (op == "<>") emitRAW("\tCOMP " + simpleCtx1->getText() + "\n\tJEQ ");
+            else if (op == "<" ) emitRAW("\tCOMP " + simpleCtx1->getText() + "\n\tJGT ");
+            else if (op == "<=") emitRAW("\tCOMP " + simpleCtx1->getText() + "\n\tJGT ");
+            else if (op == ">" ) emitRAW("\tCOMP " + simpleCtx1->getText() + "\n\tJLT ");
+            else if (op == ">=") emitRAW("\tCOMP " + simpleCtx1->getText() + "\n\tJLT ");
         }
         else if (realMode)
         {
-            if (type1 == Predefined::integerType) emit(I2F);
-            emitSimpleExpression(simpleCtx2);
-            if (type2 == Predefined::integerType) emit(I2F);
+            std::cerr << "realMode not implemented" << std::endl;
+            exit(-1);
+            // if (type1 == Predefined::integerType) emit(I2F);
+            // emitSimpleExpression(simpleCtx2);
+            // if (type2 == Predefined::integerType) emit(I2F);
 
-            emit(FCMPG);
-
-            if      (op == "=" ) emit(IFEQ, trueLabel);
-            else if (op == "<>") emit(IFNE, trueLabel);
-            else if (op == "<" ) emit(IFLT, trueLabel);
-            else if (op == "<=") emit(IFLE, trueLabel);
-            else if (op == ">" ) emit(IFGT, trueLabel);
-            else if (op == ">=") emit(IFGE, trueLabel);
+            // emit(FCMPG);
         }
         else  // stringMode
         {
-            emitSimpleExpression(simpleCtx2);
-            emit(INVOKEVIRTUAL,
-                 "java/lang/String.compareTo(Ljava/lang/String;)I");
-            localStack->decrease(1);
-
-            if      (op == "=" ) emit(IFEQ, trueLabel);
-            else if (op == "<>") emit(IFNE, trueLabel);
-            else if (op == "<" ) emit(IFLT, trueLabel);
-            else if (op == "<=") emit(IFLE, trueLabel);
-            else if (op == ">" ) emit(IFGT, trueLabel);
-            else if (op == ">=") emit(IFGE, trueLabel);
+            std::cerr << "stringMode not implemented" << std::endl;
+            exit(-3);
+            // emitSimpleExpression(simpleCtx2);
+            // emit(INVOKEVIRTUAL, "java/lang/String.compareTo(Ljava/lang/String;)I");
+            // localStack->decrease(1);
         }
-
-        emit(ICONST_0); // false
-        emit(GOTO, exitLabel);
-        emitLabel(trueLabel);
-        emit(ICONST_1); // true
-        emitLabel(exitLabel);
 
         localStack->decrease(1);  // only one branch will be taken
     }
