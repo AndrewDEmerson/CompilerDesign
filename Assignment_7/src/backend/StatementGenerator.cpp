@@ -164,9 +164,7 @@ void StatementGenerator::emitWhile(PascalParser::WhileStatementContext *ctx)
     auto *exitLabel = new Label();
 
     emitLabel(topLabel);
-
     compiler->visitExpression(ctx->expression());
-
     emitLabel(exitLabel);
 
     compiler->visit(ctx->statement());
