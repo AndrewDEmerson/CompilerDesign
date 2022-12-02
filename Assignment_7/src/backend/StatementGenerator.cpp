@@ -98,7 +98,7 @@ void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
         compiler->visit(ctx->falseStatement());
     }
 
-    emitLabel(exitlab);
+    emitRAW(exitlab->getString() + " RMO A, A\n");
 }
 
 // Done 
@@ -139,7 +139,7 @@ void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
         k++;
     }
 
-    emitLabel(exitCase);
+    emitRAW(exitCase->getString() + " RMO A, A\n");
 }
 
 // Done
@@ -154,7 +154,7 @@ void StatementGenerator::emitRepeat(PascalParser::RepeatStatementContext *ctx)
     compiler->visit(ctx->expression());
     emitLabel(loopExitLabel);
     emitRAW("\tJ " + loopTopLabel->getString()+ '\n');
-    emitLabel(loopExitLabel);
+    emitRAW('\t' + loopExitLabel->getString() + " RMO A, A\n");
 }
 
 // Done 
@@ -171,7 +171,7 @@ void StatementGenerator::emitWhile(PascalParser::WhileStatementContext *ctx)
 
     compiler->visit(ctx->statement());
     emitRAW("\tJ " + topLabel->getString() + "\n");
-    emitLabel(exitLabel);
+    emitRAW(exitLabel->getString() + " RMO A, A\n");
 }
 
 // Done
@@ -206,7 +206,7 @@ void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)
     compiler->visit(ctx->statement());
     emitRAW("\tJ " + topLabel->getString() + "\n");
 
-    emitLabel(exitLabel);
+    emitRAW(exitLabel->getString() + " RMO A, A\n");
 }
  
 void StatementGenerator::emitProcedureCall(PascalParser::ProcedureCallStatementContext *ctx)
