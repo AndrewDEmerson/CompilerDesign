@@ -26,6 +26,7 @@ string StatementGenerator::typeToString(Typespec *type){
     return typeMap[type];
 }
 
+// Done
 void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext *ctx)
 {
     PascalParser::VariableContext *varCtx  = ctx->lhs()->variable();
@@ -70,16 +71,78 @@ void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext
     }
 }
 
+// Done? 
 void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
 {
-    /***** Complete this member function. *****/
+    auto *truelab = new Label();
+    auto *exitlab = new Label();
+    auto *falselab = new Label();
+
+    //Print the condition 
+    compiler->visitExpression(ctx->expression());
+
+    // If there is a false statement then print 
+    // The label to jump to
+    if (ctx->ELSE()) {
+        emitRAW(falselab->getString() +'\n');
+        compiler->visit(ctx->trueStatement());
+        emitRAW("\tJ " + exitlab->getString() + '\n');  
+    }
+    else {
+        emitRAW(exitlab->getString() + "\n");
+        compiler->visit(ctx->trueStatement());
+    }
+
+    if (ctx->ELSE()) {
+        emitLabel(falselab);
+        compiler->visit(ctx->falseStatement());
+    }
+
+    emitLabel(exitlab);
 }
 
+// Done 
 void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
 {
-    /***** Complete this member function. *****/
+    std::vector<std::pair<PascalParser::CaseBranchContext *, Label *>> branchLabels;
+
+    for (PascalParser::CaseBranchContext *branch: ctx->caseBranchList()->caseBranch()) branchLabels.emplace_back(branch, new Label);
+    auto *exitCase = new Label;
+
+    std::set<std::pair<int, Label *>> labelSet;
+    for (auto &branchLabel: branchLabels) {
+        if (!branchLabel.first->caseConstantList()) continue;
+        for (PascalParser::CaseConstantContext *constantCtx: branchLabel.first->caseConstantList()->caseConstant()) {
+            labelSet.insert(std::make_pair(constantCtx->value, branchLabel.second));
+        }
+    }
+    int j = 0;
+    compiler->visit(ctx->expression());
+    for (auto entry: labelSet){
+        int i = 0;
+        for (auto &branchLabel: branchLabels) {
+            if (i!=0) break;
+            emitRAW("\tCOMP #"+to_string(entry.first)+ "\n");
+            emitRAW("\tJEQ " + branchLabels[j].second->getString() + "\n");
+            i++;
+        }
+        j++;
+    }
+    emitRAW("\tJ "+exitCase->getString()+"\n");
+
+    int k = 0; 
+    for (auto entry: branchLabels) {
+        if (k==branchLabels.size()-1) break;
+        emitLabel(entry.second);
+        if (entry.first->statement() != nullptr) compiler->visit(entry.first->statement());
+        emitRAW("\tJ "+exitCase->getString() + '\n');
+        k++;
+    }
+
+    emitLabel(exitCase);
 }
 
+// Done
 void StatementGenerator::emitRepeat(PascalParser::RepeatStatementContext *ctx)
 {
     Label *loopTopLabel  = new Label();
@@ -89,38 +152,77 @@ void StatementGenerator::emitRepeat(PascalParser::RepeatStatementContext *ctx)
 
     compiler->visit(ctx->statementList());
     compiler->visit(ctx->expression());
-    emit(IFNE, loopExitLabel);
-    emit(GOTO, loopTopLabel);
-
+    emitLabel(loopExitLabel);
+    emitRAW("\tJ " + loopTopLabel->getString()+ '\n');
     emitLabel(loopExitLabel);
 }
 
+// Done 
 void StatementGenerator::emitWhile(PascalParser::WhileStatementContext *ctx)
 {
-    /***** Complete this member function. *****/
+    auto *topLabel = new Label();
+    auto *exitLabel = new Label();
+
+    emitLabel(topLabel);
+
+    compiler->visitExpression(ctx->expression());
+
+    emitLabel(exitLabel);
+
+    compiler->visit(ctx->statement());
+    emitRAW("\tJ " + topLabel->getString() + "\n");
+    emitLabel(exitLabel);
 }
 
+// Done
 void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)
 {
-    /***** Complete this member function. *****/
-}
+    auto *topLabel = new Label();
+    auto *exitLabel = new Label();
+    auto *add = new Label();
+    auto *sub = new Label(); 
+    auto *stateLabel = new Label();
 
+    compiler->visit(ctx->expression()[0]);
+    emitStoreValue(ctx->variable()->entry, ctx->variable()->type);
+
+    emitLabel(topLabel);
+
+    compiler->visit(ctx->expression()[1]);
+    emitRAW("\tCOMP " + ctx->variable()->getText() +"\n");
+    emitRAW("\tJLT " + add->getString() + '\n');
+    emitRAW("\tJGT " + sub->getString() + '\n');
+    emitRAW("\tJ " + exitLabel->getString() + '\n');
+    
+    emitLabel(add);
+    emitRAW("\tLDA b\n\tADD 1\n\tSTA b\n");
+    emitRAW("\tJ " + stateLabel->getString() + "\n");
+
+    emitLabel(sub);
+    emitRAW("\tLDA b\n\tSUB 1\n\tSTA b\n");
+    emitRAW("\tJ " + stateLabel->getString() + "\n");
+
+    emitLabel(stateLabel);
+    compiler->visit(ctx->statement());
+    emitRAW("\tJ " + topLabel->getString() + "\n");
+
+    emitLabel(exitLabel);
+}
+ 
 void StatementGenerator::emitProcedureCall(PascalParser::ProcedureCallStatementContext *ctx)
 {
-    /***** Complete this member function. *****/
+    emitCall(ctx->procedureName()->entry,ctx->argumentList());
 }
 
 void StatementGenerator::emitFunctionCall(PascalParser::FunctionCallContext *ctx)
 {
     emitComment("emittingFunctionCall");
     emitCall(ctx->functionName()->entry,ctx->argumentList());
-    /***** Complete this member function. *****/
 }
 
 void StatementGenerator::emitCall(SymtabEntry *routineId,
                                   PascalParser::ArgumentListContext *argListCtx)
 {
-    /***** Complete this member function. *****/
     string argType;
 
     if (argListCtx) {
@@ -133,7 +235,7 @@ void StatementGenerator::emitCall(SymtabEntry *routineId,
     }
 
     // Only static functions
-    string functionName = "routine"+routineId->getName()+argType;//programName + routineId->getName() + argType;
+    string functionName = "routine"+routineId->getName()+argType;   //programName + routineId->getName() + argType;
     string retpt = "returnpt" + to_string(static_cast<int>(rand()%9999));
     char str[256];
     emitRAW(

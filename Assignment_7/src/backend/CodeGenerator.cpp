@@ -89,7 +89,7 @@ void CodeGenerator::emitComment(PascalParser::StatementContext *ctx)
 
 void CodeGenerator::emitLabel(Label *label)
 {
-    *objectFile << label << ":" << endl;
+    *objectFile << label << '\n';
     objectFile->flush();
 }
 
