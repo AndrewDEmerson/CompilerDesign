@@ -105,8 +105,8 @@ void ProgramGenerator::emitMainMethod(PascalParser::ProgramContext *ctx)
     emitMainPrologue(programId);
 
     // Emit code to allocate any arrays, records, and strings.
-    StructuredDataGenerator structureCode(this, compiler);
-    structureCode.emitData(programId);
+    //StructuredDataGenerator structureCode(this, compiler);
+    //structureCode.emitData(programId);
 
     // Emit code for the compound statement.
     emitLine();
