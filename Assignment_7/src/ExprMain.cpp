@@ -16,7 +16,7 @@
 #include "intermediate/type/Typespec.h"
 
 static const bool print_tokens = false;
-static const bool print_tree = true;
+static const bool print_tree = false;
 static const bool print_tables = false;
 
 int main(int argc, const char *argv[]) {

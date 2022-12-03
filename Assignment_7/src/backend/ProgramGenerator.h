@@ -1,5 +1,4 @@
-#ifndef PROGRAMGENERATOR_H_
-#define PROGRAMGENERATOR_H_
+#pragma once
 
 #include "CodeGenerator.h"
 
@@ -110,5 +109,3 @@ private:
 };
 
 }} // namespace backend::compiler
-
-#endif /* PROGRAMGENERATOR_H_ */

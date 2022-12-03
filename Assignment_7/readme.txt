@@ -7,7 +7,9 @@ Run The Program.
   Run the program with no arguments (./main) to read in from CIN.
   Run the program with a filepath to read from the file. (./main input.txt)
 
-
+NOTE: 
+  Due to limited time, our assembler only supports Integers (no floats or arrays)
+  Recursive funtions are supported
 
 
 Development Instructuctions:

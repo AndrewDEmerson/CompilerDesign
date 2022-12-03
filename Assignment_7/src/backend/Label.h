@@ -1,13 +1,4 @@
-/**
- * <h1>Label</h1>
- *
- * <p>Jasmin instruction label.</p>
- *
- * <p>Copyright (c) 2020 by Ronald Mak</p>
- * <p>For instructional purposes only.  No warranties.</p>
- */
-#ifndef LABEL_H_
-#define LABEL_H_
+#pragma once
 
 #include <sstream>
 #include <iomanip>
@@ -53,5 +44,3 @@ inline ostream& operator << (ostream& ofs, const Label *label)
 }
 
 }}  // namespace backend::compiler
-
-#endif /* LABEL_H_ */

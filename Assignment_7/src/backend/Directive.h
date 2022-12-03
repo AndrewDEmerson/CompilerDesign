@@ -1,13 +1,4 @@
-/**
- * <h1>Directive</h1>
- *
- * <p>Jasmin directives.</p>
- *
- * <p>Copyright (c) 2020 by Ronald Mak</p>
- * <p>For instructional purposes only.  No warranties.</p>
- */
-#ifndef DIRECTIVE_H_
-#define DIRECTIVE_H_
+#pragma once
 
 #include "../../Object.h"
 
@@ -73,5 +64,3 @@ inline ostream& operator << (ostream& ofs, const Directive& directive)
 }
 
 }}  // namespace wci::backend::compiler
-
-#endif /* DIRECTIVE_H_ */

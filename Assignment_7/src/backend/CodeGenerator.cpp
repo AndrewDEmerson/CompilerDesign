@@ -1,11 +1,3 @@
-/**
- * <h1>CodeGenerator</h1>
- *
- * <p>The Jasmin assembly code generator for the compiler.</p>
- *
- * <p>Copyright (c) 2020 by Ronald Mak</p>
- * <p>For instructional purposes only.  No warranties.</p>
- */
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -19,7 +11,6 @@
 #include "CodeGenerator.h"
 #include "Directive.h"
 #include "Label.h"
-#include "Instruction.h"
 #include "LocalVariables.h"
 #include "LocalStack.h"
 
@@ -105,115 +96,6 @@ void CodeGenerator::emitLabel(string value, Label *label)
     objectFile->flush();
 }
 
-void CodeGenerator::emitDirective(Directive directive)
-{
-    *objectFile << directive << endl;
-    objectFile->flush();
-    ++count;
-}
-
-void CodeGenerator::emitDirective(Directive directive, string operand)
-{
-    *objectFile << directive << " " << operand << endl;
-    objectFile->flush();
-    ++count;
-}
-
-void CodeGenerator::emitDirective(Directive directive, int operand)
-{
-    *objectFile << directive << " " << operand << endl;
-    objectFile->flush();
-    ++count;
-}
-
-/**
- * Emit a 2-operand directive.
- * @param directive the directive code.
- * @param operand the operand.
- */
-void CodeGenerator::emitDirective(Directive directive,
-                                  string operand1, string operand2)
-{
-    *objectFile << directive << " " << operand1 << " " << operand2 << endl;
-    objectFile->flush();
-    ++count;
-}
-void CodeGenerator::emitDirective(Directive directive,
-                                  string operand1, string operand2,
-                                  string operand3)
-{
-    *objectFile << directive << " " + operand1 << " " << operand2
-                                               << " " << operand3 << endl;
-    objectFile->flush();
-    ++count;
-}
-
-void CodeGenerator::emit(Instruction instruction)
-{
-    *objectFile << "\t" << instruction << endl;
-    objectFile->flush();
-
-    localStack->increase(stackUse(instruction));
-    ++count;
-}
-
-void CodeGenerator::emit(Instruction instruction, string operand)
-{
-    *objectFile << "\t" << instruction << "\t" << operand << endl;
-    objectFile->flush();
-
-    localStack->increase(stackUse(instruction));
-    ++count;
-}
-
-void CodeGenerator::emit(Instruction instruction, int operand)
-{
-    *objectFile << "\t" << instruction << "\t" << operand << endl;
-    objectFile->flush();
-
-    localStack->increase(stackUse(instruction));
-    ++count;
-}
-
-void CodeGenerator::emit(Instruction instruction, double operand)
-{
-    *objectFile << "\t" << instruction << "\t" << operand << endl;
-    objectFile->flush();
-
-    localStack->increase(stackUse(instruction));
-    ++count;
-}
-
-void CodeGenerator::emit(Instruction instruction, Label *label)
-{
-    *objectFile << "\t" << instruction << "\t" << label << endl;
-    objectFile->flush();
-
-    localStack->increase(stackUse(instruction));
-    ++count;
-}
-
-void CodeGenerator::emit(Instruction instruction, int operand1, int operand2)
-{
-    *objectFile << "\t" << instruction << "\t" << operand1 << " "
-                                               << operand2 << endl;
-    objectFile->flush();
-
-    localStack->increase(stackUse(instruction));
-    ++count;
-}
-
-void CodeGenerator::emit(Instruction instruction,
-                         string operand1, string operand2)
-{
-    *objectFile << "\t" << instruction << "\t" << operand1 << " "
-                                               << operand2 << endl;
-    objectFile->flush();
-
-    localStack->increase(stackUse(instruction));
-    ++count;
-}
-
 // =====
 // Loads
 // =====
@@ -222,9 +104,18 @@ void CodeGenerator::emit(Instruction instruction,
  * Emit a load of an integer constant value.
  * @param value the constant value.
  */
+void CodeGenerator::emitLoadConstant(int value, bool loadToS)
+{
+    if (loadToS){
+        emitRAW("\tLDS\t#"+to_string(value)+"\n");
+    }else{
+        emitRAW("\tLDA\t#"+to_string(value)+"\n");
+    }
+}
+
 void CodeGenerator::emitLoadConstant(int value)
 {
-    emitRAW("\tLDA\t#"+to_string(value)+"\n");
+    emitRAW("\tLDA\t#"+to_string(value)+"\n"); 
 }
 
 /**
@@ -233,10 +124,7 @@ void CodeGenerator::emitLoadConstant(int value)
  */
 void CodeGenerator::emitLoadConstant(double value)
 {
-    if      (value == 0.0f) emit(FCONST_0);
-    else if (value == 1.0f) emit(FCONST_1);
-    else if (value == 2.0f) emit(FCONST_2);
-    else                    emit(LDC, value);
+
 }
 
 void CodeGenerator::emitLoadConstant(string value)
@@ -279,8 +167,6 @@ void CodeGenerator::emitLoadValue(SymtabEntry *variableId)
     else if (nestingLevel == 1)
     {
         string variableName = variableId->getName();
-        //string name = programName + "/" + variableName;
-        //emit(GETSTATIC, name, typeDescriptor(type));
         emitRAW("\tLDA\t"+variableName+"\n");
     }
 
@@ -316,27 +202,6 @@ void CodeGenerator::emitLoadLocal(Typespec *type, int index)
             "\tLDX\tstptr\n"
             "\tLDA\t"+to_string(9+3*index)+",X\n");
     }
-    /*else if (type == Predefined::realType)
-    {
-        switch (index) {
-            case 0:  emit(FLOAD_0); break;
-            case 1:  emit(FLOAD_1); break;
-            case 2:  emit(FLOAD_2); break;
-            case 3:  emit(FLOAD_3); break;
-            default: emit(FLOAD, index);
-        }
-    }
-    else
-    {
-        switch (index)
-        {
-            case 0:  emit(ALOAD_0); break;
-            case 1:  emit(ALOAD_1); break;
-            case 2:  emit(ALOAD_2); break;
-            case 3:  emit(ALOAD_3); break;
-            default: emit(ALOAD, index);
-        }
-    }*/
     else{
         std::cerr << "returning of non-int types not currently supported" << std::endl;
         exit(-6);
@@ -349,18 +214,7 @@ void CodeGenerator::emitLoadLocal(Typespec *type, int index)
 
 void CodeGenerator::emitStoreValue(SymtabEntry *targetId, Typespec *targetType)
 {
-    if (targetId == nullptr)
-    {
-        emitStoreToArrayElement(targetType);
-    }
-    else if (targetId->getKind() == RECORD_FIELD)
-    {
-        emitStoreToRecordField(targetId);
-    }
-    else
-    {
         emitStoreToUnmodifiedVariable(targetId, targetType);
-    }
 }
 
 void CodeGenerator::emitStoreToUnmodifiedVariable(SymtabEntry *targetId,
@@ -375,17 +229,14 @@ void CodeGenerator::emitStoreToUnmodifiedVariable(SymtabEntry *targetId,
         string targetName = targetId->getName();
         string name = programName + "/" + targetName;
 
-        emitRangeCheck(targetType);
         char str[32];
         sprintf(str,"\tSTA\t%s\n",targetName.c_str());
         emitRAW(str);
-        //emit(PUTSTATIC, name, typeDescriptor(targetType->baseType()));
     }
 
     // Local variable.
     else
     {
-        emitRangeCheck(targetType);
         emitStoreLocal(targetType->baseType(), slot);
     }
 }
@@ -410,214 +261,14 @@ void CodeGenerator::emitStoreLocal(Typespec *type, int slot)
             "\tLDX\tstptr\n"
             "\tSTA\t"+to_string(9+3*slot)+",X\n");
     }
-    /*else if (type == Predefined::realType)
-    {
-        switch (slot) {
-            case 0:  emit(FSTORE_0); break;
-            case 1:  emit(FSTORE_1); break;
-            case 2:  emit(FSTORE_2); break;
-            case 3:  emit(FSTORE_3); break;
-            default: emit(FSTORE, slot);
-        }
-    }
-    else
-    {
-        switch (slot)
-        {
-            case 0:  emit(ASTORE_0); break;
-            case 1:  emit(ASTORE_1); break;
-            case 2:  emit(ASTORE_2); break;
-            case 3:  emit(ASTORE_3); break;
-            default: emit(ASTORE, slot);
-        }
-    }*/
     else{
         std::cerr << "non-int not supported" << std::endl;
         exit(-7);
     }
 }
 
-void CodeGenerator::emitStoreToArrayElement(Typespec *elmtType)
-{
-    Form form = SCALAR;
-
-    if (elmtType != nullptr)
-    {
-        elmtType = elmtType->baseType();
-        form = elmtType->getForm();
-    }
-
-    emit(  elmtType == Predefined::integerType ? IASTORE
-         : elmtType == Predefined::realType    ? FASTORE
-         : elmtType == Predefined::booleanType ? BASTORE
-         : elmtType == Predefined::charType    ? CASTORE
-         : form == ENUMERATION                 ? IASTORE
-         :                                       AASTORE);
-}
-
-void CodeGenerator::emitStoreToRecordField(SymtabEntry *fieldId)
-{
-    string fieldName = fieldId->getName();
-    Typespec *fieldType = fieldId->getType();
-    Typespec *recordType = fieldId->getSymtab()->getOwner()->getType();
-
-    string recordTypePath = recordType->getRecordTypePath();
-    string fieldPath = recordTypePath + "/" + fieldName;
-
-    emit(PUTFIELD, fieldPath, typeDescriptor(fieldType));
-}
-
-// ======================
-// Miscellaneous emitters
-// ======================
-
-void CodeGenerator::emitCheckCast(Typespec *type)
-{
-    string descriptor = typeDescriptor(type);
-
-    // Don't bracket the type with L; if it's not an array.
-    if (descriptor[0] == 'L')
-    {
-        descriptor = descriptor.substr(1, descriptor.length() - 2);
-    }
-
-    emit(CHECKCAST, descriptor);
-}
-
-void CodeGenerator::emitCheckCastClass(Typespec *type)
-{
-    string descriptor = objectTypeName(type);
-
-    // Don't bracket the type with L; if it's not an array.
-    if (descriptor[0] == 'L')
-    {
-        descriptor = descriptor.substr(1, descriptor.length() - 2);
-    }
-
-    emit(CHECKCAST, descriptor);
-}
-
-void CodeGenerator::emitRangeCheck(Typespec *targetType)
-{
-//        if (targetType.getForm() == SUBRANGE)
-//        {
-//            int min = targetType.getSubrangeMinValue();
-//            int max = targetType.getSubrangeMaxValue();
-//
-//            emit(DUP);
-//            emitLoadConstant(min);
-//            emitLoadConstant(max);
-//            emit(INVOKESTATIC, "RangeChecker/check(III)V");
-//
-//            localStack->use(3);
-//        }
-}
-
 // =========
 // Utilities
 // =========
-
-string CodeGenerator::typeDescriptor(SymtabEntry *id)
-{
-    Typespec *type = id->getType();
-    return type != nullptr ? typeDescriptor(type) : "V";
-}
-string CodeGenerator::typeDescriptor(Typespec *pascalType)
-{
-    Form form = pascalType->getForm();
-    string descriptor;
-
-    while (form == ARRAY)
-    {
-        descriptor += "[";
-        pascalType =  pascalType->getArrayElementType();
-        form = pascalType->getForm();
-    }
-
-    pascalType = pascalType->baseType();
-    string str;
-
-    if      (pascalType == Predefined::integerType) str = "I";
-    else if (pascalType == Predefined::realType)    str = "F";
-    else if (pascalType == Predefined::booleanType) str = "Z";
-    else if (pascalType == Predefined::charType)    str = "C";
-    else if (pascalType == Predefined::stringType)  str = "S";
-    else if (form == ENUMERATION)                  str = "I";
-    else /* (form == RECORD) */ str = "L" + pascalType->getRecordTypePath() + ";";
-
-    descriptor += str;
-    return descriptor;
-}
-
-string CodeGenerator::objectTypeName(Typespec *pascalType)
-{
-    Form form = pascalType->getForm();
-    string typeName;
-    bool isArray = false;
-
-    while (form == ARRAY)
-    {
-        typeName += "[";
-        pascalType = pascalType->getArrayElementType();
-        form = pascalType->getForm();
-        isArray = true;
-    }
-
-    if (isArray)  typeName += "L";
-
-    pascalType = pascalType->baseType();
-    string str;
-
-    if      (pascalType == Predefined::integerType) str = "java/lang/Integer";
-    else if (pascalType == Predefined::realType)    str = "java/lang/Float";
-    else if (pascalType == Predefined::booleanType) str = "java/lang/Boolean";
-    else if (pascalType == Predefined::charType)    str = "java/lang/Character";
-    else if (pascalType == Predefined::stringType)  str = "Ljava/lang/String;";
-    else if (form == ENUMERATION)                  str = "java/lang/Integer";
-    else /* (form == RECORD) */ str = "L" + pascalType->getRecordTypePath() + ";";
-
-    typeName += str;
-    if (isArray) typeName += ";";
-
-    return typeName;
-}
-bool CodeGenerator::needsCloning(SymtabEntry *formalId)
-{
-    Typespec *type = formalId->getType();
-    Form form = type->getForm();
-    Kind kind = formalId->getKind();
-
-    // Arrays and records are normally passed by reference
-    // and so must be cloned to be passed by value.
-    return (   (kind == VALUE_PARAMETER))
-            && ((form == ARRAY) || (form == RECORD));
-}
-
-string CodeGenerator::valueOfSignature(Typespec *type)
-{
-    string javaType = objectTypeName(type);
-    string typeCode = typeDescriptor(type);
-
-    stringstream ss;
-    ss << javaType << "/valueOf(" << typeCode << ")L" << javaType << ";";
-
-    return ss.str();
-}
-
-string CodeGenerator::valueSignature(Typespec *type)
-{
-    string javaType = objectTypeName(type);
-    string typeCode = typeDescriptor(type);
-    string typeName = type == Predefined::integerType ? "int"
-                    : type == Predefined::realType    ? "double"
-                    : type == Predefined::booleanType ? "boolean"
-                    : type == Predefined::charType    ? "char"
-                    :                                   "int";
-
-    stringstream ss;
-    ss << javaType << "." << typeName << "Value()" << typeCode;
-
-    return ss.str();
-}
 
 }} // namespace backend::compiler

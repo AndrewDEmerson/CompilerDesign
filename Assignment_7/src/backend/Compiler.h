@@ -1,5 +1,4 @@
-#ifndef COMPILER_H_
-#define COMPILER_H_
+#pragma once
 
 #include "PascalBaseVisitor.h"
 #include "antlr4-runtime.h"
@@ -108,5 +107,3 @@ private:
 };
 
 }}  // namespace backend::compiler
-
-#endif /* COMPILER_H_ */

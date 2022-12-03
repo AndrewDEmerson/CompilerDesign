@@ -1,5 +1,4 @@
-#ifndef STATEMENTGENERATOR_H_
-#define STATEMENTGENERATOR_H_
+#pragma once
 
 #include <vector>
 #include <map>
@@ -165,5 +164,3 @@ private:
 };
 
 }} // namespace backend::compiler
-
-#endif /* STATEMENTGENERATOR_H_ */

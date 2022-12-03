@@ -1,13 +1,4 @@
-/**
- * <h1>CodeGenerator</h1>
- *
- * <p>The Jasmin assembly code generator for the compiler.</p>
- *
- * <p>Copyright (c) 2020 by Ronald Mak</p>
- * <p>For instructional purposes only.  No warranties.</p>
- */
-#ifndef COMPILER_CODEGENERATOR_H_
-#define COMPILER_CODEGENERATOR_H_
+#pragma once
 
 #include <fstream>
 
@@ -19,7 +10,6 @@
 #include "intermediate/type/Typespec.h"
 #include "Directive.h"
 #include "Label.h"
-#include "Instruction.h"
 #include "LocalVariables.h"
 #include "LocalStack.h"
 
@@ -71,10 +61,6 @@ public:
           localStack(parent->localStack),
           compiler(compiler) {}
 
-    /**
-     * Get the name of the object (Java) file.
-     * @return the name.
-     */
     string getObjectFileName() const { return objectFileName; }
 
     /**
@@ -160,56 +146,6 @@ public:
     void emitDirective(Directive directive,
                        string operand1, string operand2, string operand3);
 
-    /**
-     * Emit a 0-operand instruction.
-     * @param instruction the operation code.
-     */
-    void emit(Instruction instruction);
-
-    /**
-     * Emit a 1-operand instruction.
-     * @param instruction the operation code.
-     * @param operand the operand text.
-     */
-    void emit(Instruction instruction, string operand);
-
-    /**
-     * Emit a 1-operand instruction.
-     * @param instruction the operation code.
-     * @param operand the operand value.
-     */
-    void emit(Instruction instruction, int operand);
-
-    /**
-     * Emit a 1-operand instruction.
-     * @param instruction the operation code.
-     * @param operand the operand value.
-     */
-    void emit(Instruction instruction, double operand);
-
-    /**
-     * Emit a 1-operand instruction.
-     * @param instruction the operation code.
-     * @param label the label operand.
-     */
-    void emit(Instruction instruction, Label *label);
-
-    /**
-     * Emit a 2-operand instruction.
-     * @param instruction the operation code.
-     * @param operand1 the value of the first operand.
-     * @param operand2 the value of the second operand.
-     */
-    void emit(Instruction instruction, int operand1, int operand2);
-
-    /**
-     * Emit a 2-operand instruction.
-     * @param instruction the operation code.
-     * @param operand1 the text of the first operand.
-     * @param operand2 the text of the second operand.
-     */
-    void emit(Instruction instruction, string operand1, string operand2);
-
     // =====
     // Loads
     // =====
@@ -219,6 +155,7 @@ public:
      * @param value the constant value.
      */
     void emitLoadConstant(int value);
+    void emitLoadConstant(int value, bool loadToS);
 
     /**
      * Emit a load of a real constant value.
@@ -265,79 +202,11 @@ public:
      */
     void emitStoreLocal(Typespec *type, int slot);
 
-    // ======================
-    // Miscellaneous emitters
-    // ======================
-
-    /**
-     * Emit the CHECKCAST instruction for a scalar type.
-     * @param type the data type.
-     */
-    void emitCheckCast(Typespec *type);
-
-    /**
-     * Emit the CHECKCAST instruction for a class.
-     * @param type the data type.
-     */
-    void emitCheckCastClass(Typespec *type);
-
     /**
      * Emit a function return of a value.
      * @param type the type of the return value.
      */
     void emitReturnValue(Typespec *type);
-
-    /**
-     * Emit code to perform a runtime range check before an assignment.
-     * @param targetType the type of the assignment target.
-     */
-    void emitRangeCheck(Typespec*targetType);
-
-    // =========
-    // Utilities
-    // =========
-
-    /**
-     * Emit a type descriptor of an identifier's type.
-     * @param id the symbol table entry of an identifier.
-     * @return the type descriptor.
-     */
-    string typeDescriptor(SymtabEntry *id);
-
-    /**
-     * Return a type descriptor for a Pascal datatype.
-     * @param pascalType the datatype.
-     * @return the type descriptor.
-     */
-    string typeDescriptor(Typespec *pascalType);
-
-    /**
-     * Return the Java object name for a Pascal datatype.
-     * @param pascalType the datatype.
-     * @return the object name.
-     */
-    string objectTypeName(Typespec *pascalType);
-
-    /**
-     * Return whether or not a value needs to be cloned to pass by value.
-     * @param formalId the symbol table entry of the formal parameter.
-     * @return true if needs wrapping, false if not.
-     */
-    bool needsCloning(SymtabEntry *formalId);
-
-    /**
-     * Return the valueOf() signature for a given scalar type.
-     * @param type the scalar type.
-     * @return the valueOf() signature.
-     */
-    string valueOfSignature(Typespec *type);
-
-    /**
-     * Return the xxxValue() signature for a given scalar type.
-     * @param type the scalar type.
-     * @return the valueOf() signature.
-     */
-    string valueSignature(Typespec *type);
 
 private:
     /**
@@ -363,5 +232,3 @@ private:
 };
 
 }} // namespace backend::compiler
-
-#endif /* COMPILER_CODEGENERATOR_H_ */

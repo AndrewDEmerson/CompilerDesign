@@ -4,10 +4,8 @@
 #include "antlr4-runtime.h"
 
 #include "Directive.h"
-#include "Instruction.h"
 #include "Compiler.h"
 #include "ProgramGenerator.h"
-#include "StructuredDataGenerator.h"
 
 namespace backend { namespace compiler {
 
@@ -27,6 +25,8 @@ void ProgramGenerator::emitProgram(PascalParser::ProgramContext *ctx)
         ".stack variables\n"
         "stack\tRESW\t"+to_string(STACKSIZE)+"\n"
         "stptr\tRESW\t1\n"
+        ".tmp variables\n"
+        "tempAreg\tRESW\t1\n"
         );
 
     emitProgramVariables();
@@ -53,36 +53,14 @@ void ProgramGenerator::emitProgramVariables()
     {
         if (id->getKind() == VARIABLE)
         {
-            //emitDirective(FIELD_PRIVATE_STATIC, id->getName(),typeDescriptor(id));
-            if(typeDescriptor(id) == "S"){
-                emitRAW(id->getName()+"\tRESW\t256\n");
-            }else{
-                emitRAW(id->getName()+"\tRESW\t1\n");
-            }
+            emitRAW(id->getName()+"\tRESW\t1\n");   
         }
     }
 }
 
 void ProgramGenerator::emitInputScanner()
 {
-    emitLine();
-    emitComment("Runtime input scanner");
-    emitDirective(METHOD_STATIC, "<clinit>()V");
-    emitLine();
 
-    emit(NEW, "java/util/Scanner");
-    emit(DUP);
-    emit(GETSTATIC, "java/lang/System/in Ljava/io/InputStream;");
-    emit(INVOKESPECIAL, "java/util/Scanner/<init>(Ljava/io/InputStream;)V");
-    emit(PUTSTATIC, programName + "/_sysin Ljava/util/Scanner;");
-    emit(RETURN);
-
-    emitLine();
-    emitDirective(LIMIT_LOCALS, 0);
-    emitDirective(LIMIT_STACK,  3);
-    emitDirective(END_METHOD);
-
-    localStack->reset();
 }
 
 void ProgramGenerator::emitSubroutines(PascalParser::RoutinesPartContext *ctx)
@@ -103,10 +81,6 @@ void ProgramGenerator::emitMainMethod(PascalParser::ProgramContext *ctx)
     emitLine();
     emitComment("Main Method");
     emitMainPrologue(programId);
-
-    // Emit code to allocate any arrays, records, and strings.
-    StructuredDataGenerator structureCode(this, compiler);
-    structureCode.emitData(programId);
 
     // Emit code for the compound statement.
     emitLine();
@@ -141,10 +115,6 @@ void ProgramGenerator::emitRoutine(PascalParser::RoutineDefinitionContext *ctx)
     emitRoutineHeader(routineId);
     emitRoutineLocals(routineId);
 
-    // Generate code to allocate any arrays, records, and strings.
-    //StructuredDataGenerator structuredCode(this, compiler);
-    //structuredCode.emitData(routineId);
-
     localVariables = new LocalVariables(routineSymtab->getMaxSlotNumber());
 
     // Emit code for the compound statement.
@@ -160,16 +130,6 @@ void ProgramGenerator::emitRoutineHeader(SymtabEntry *routineId)
     string routineName = routineId->getName();
     vector<SymtabEntry *> *parmIds = routineId->getRoutineParameters();
     string header(routineName);
-
-    // Parameter and return type descriptors.
-    if (parmIds != nullptr)
-    {
-        for (SymtabEntry *parmId : *parmIds)
-        {
-            header += typeDescriptor(parmId);
-        }
-    }
-    //header += typeDescriptor(routineId);
 
     emitLine();
     if (routineId->getKind() == PROCEDURE)
@@ -203,7 +163,6 @@ void ProgramGenerator::emitRoutineLocals(SymtabEntry *routineId)
                                || (kind == REFERENCE_PARAMETER))
         {
             int slot = id->getSlotNumber();
-            //emitDirective(VAR, to_string(slot) + " is " + id->getName(),typeDescriptor(id));
             emitComment("store value in slot " + id->getName() + " "+ to_string(slot));
         }
     }

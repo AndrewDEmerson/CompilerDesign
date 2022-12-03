@@ -1,5 +1,5 @@
 EXECUTABLE_NAME = main
-SRC=/home/andrew/CompilerDesign/Assignment_7/src
+SRC=./src
 GENERATED=$(SRC)/generated
 
 CC=g++

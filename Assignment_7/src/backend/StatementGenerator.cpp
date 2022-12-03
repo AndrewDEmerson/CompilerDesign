@@ -50,25 +50,9 @@ void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext
     // Emit code to evaluate the expression.
     compiler->visit(exprCtx);
 
-    // float variable := integer constant
-    if (   (varType == Predefined::realType)
-        && (exprType->baseType() == Predefined::integerType)) emit(I2F);
-
     // Emit code to store the expression value into the target variable.
     // The target variable has no subscripts or fields.
     if (lastModCtx == nullptr) emitStoreValue(varId, varId->getType());
-
-    // The target variable is a field.
-    else if (lastModCtx->field() != nullptr)
-    {
-        emitStoreValue(lastModCtx->field()->entry, lastModCtx->field()->type);
-    }
-
-    // The target variable is an array element.
-    else
-    {
-        emitStoreValue(nullptr, varType);
-    }
 }
 
 // Done? 
@@ -154,7 +138,7 @@ void StatementGenerator::emitRepeat(PascalParser::RepeatStatementContext *ctx)
     compiler->visit(ctx->expression());
     emitLabel(loopExitLabel);
     emitRAW("\tJ " + loopTopLabel->getString()+ '\n');
-    emitRAW('\t' + loopExitLabel->getString() + " RMO A, A\n");
+    emitRAW(loopExitLabel->getString() + "\tRMO A, A\n");
 }
 
 // Done 
@@ -292,45 +276,6 @@ int StatementGenerator::createWriteFormat(
 {
 
     return 0;
-}
-
-void StatementGenerator::emitArgumentsArray(
-                    PascalParser::WriteArgumentsContext *argsCtx, int exprCount)
-{
-    // Create the arguments array.
-    emitLoadConstant(exprCount);
-    emit(ANEWARRAY, "java/lang/Object");
-
-    int index = 0;
-
-    // Loop over the write arguments to fill the arguments array.
-    for (PascalParser::WriteArgumentContext *argCtx :
-                                                argsCtx->writeArgument())
-    {
-        string argText = argCtx->getText();
-        PascalParser::ExpressionContext *exprCtx = argCtx->expression();
-        Typespec *type = exprCtx->type->baseType();
-
-        // Skip string constants, which were made part of
-        // the format string.
-        if (argText[0] != '\'')
-        {
-            emit(DUP);
-            emitLoadConstant(index++);
-
-            compiler->visit(exprCtx);
-
-            Form form = type->getForm();
-            if (    ((form == SCALAR) || (form == ENUMERATION))
-                 && (type != Predefined::stringType))
-            {
-                emit(INVOKESTATIC, valueOfSignature(type));
-            }
-
-            // Store the value into the array.
-            emit(AASTORE);
-        }
-    }
 }
 
 void StatementGenerator::emitRead(PascalParser::ReadStatementContext *ctx)

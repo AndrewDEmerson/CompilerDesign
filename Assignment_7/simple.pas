@@ -11,12 +11,11 @@ function subf(g: integer): integer;
 var
    tempSum: integer;
 begin
-   subf := subg(g);
+   subf := subg(g) + 1;
 end;
 
 begin
-   str := 'hello world';
-   b := 5;
-   a := b;
+   b := 5 + 1;
+   a := b + 1;
    c := subf(4);
 end.
